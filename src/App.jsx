@@ -1,13 +1,17 @@
-import { useState } from 'react'
+import { BrowserRouter } from 'react-router-dom'
+import { Router } from './Router'
+import { IlhaProvider } from './contexts/IlhasContext'
 
 
 
 function App() {
 
   return (
-    <>
-     <h3>Compostaggio</h3>
-    </>
+    <BrowserRouter>
+      <IlhaProvider>
+        <Router />
+      </IlhaProvider>
+    </BrowserRouter>
   )
 }
 
