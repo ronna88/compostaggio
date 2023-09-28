@@ -9,7 +9,6 @@ const IlhaProvider = ({children}) => {
     const [ilhas, setIlhas] = useState([]);
     const [lixeiras, setLixeiras] = useState([]);
 
-
     const carregarIlhas = () => {
         console.log("carregarIlhas...");
         const agora = new Date();
@@ -19,7 +18,6 @@ const IlhaProvider = ({children}) => {
             console.log("iniciando consulta de ilhas");
             const ilhasCollection = collection(firestore, "ilhas");
             const ilhasSnapshot = await getDocs(ilhasCollection);
-
             setIlhas(
                 ilhasSnapshot.docs.map((doc) => ({
                     id: doc.id,
@@ -35,17 +33,13 @@ const IlhaProvider = ({children}) => {
             );
             localStorage.setItem('expireIlhas', expireIlhas);
         };
-
         if(!localStorage.getItem('ilhas') || !localStorage.getItem('expireIlhas')) {
             fetchIlhas();
         }
-
-
         if(localStorage.getItem('expireIlhas' < agora)){
             console.log("Fora do prazo de cache...");
             fetchIlhas();
         }
-
     }
 
 
@@ -61,7 +55,6 @@ const IlhaProvider = ({children}) => {
             console.log("iniciando consulta de lixeiras");
             const lixeirasCollection = collection(firestore, "lixeiras");
             const lixeirasSnapshot = await getDocs(lixeirasCollection);
-
             setLixeiras(
                 lixeirasSnapshot.docs.map((doc) => ({
                     id: doc.id,
@@ -70,14 +63,13 @@ const IlhaProvider = ({children}) => {
             );
             localStorage.setItem(
                 'lixeiras', 
-                JSON.stringify(ilhasSnapshot.docs.map((doc) => ({
+                JSON.stringify(lixeirasSnapshot.docs.map((doc) => ({
                     id: doc.id,
                     ...doc.data(),
                 })))
             );
             localStorage.setItem('expireLixeiras', expireLixeiras);
         };
-
         if(!localStorage.getItem('lixeiras') || !localStorage.getItem('expireLixeiras')) {
             fetchLixeiras();
         }
