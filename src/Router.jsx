@@ -28,7 +28,7 @@ export function Router() {
 
     useEffect(() => {
         if(ilhas.length === 0) {
-            carregarIlhas();
+            //carregarIlhas()
         }
         if(lixeiras.length === 0) {
            // carregarLixeiras()
@@ -41,7 +41,7 @@ export function Router() {
             <Route path="/cadastro-ilha" element={ <IlhasForm /> } />
             <Route path="/ilha"  element={ <Listagem componente={<Table header={headerIlhas}/>} /> } />
             <Route path="/cadastro-lixeira" element={ <LixeirasForm ilhas={ilhas} /> } />
-            <Route path="/lixeira"  element={ <Listagem componente={<Table header={headerLixeiras}/>} /> } />
+            <Route path="/lixeira"  element={ <Listagem componente={<Table data={lixeiras} header={headerLixeiras}/>} /> } />
             <Route path="/busca" element={ <BuscaForm lixeiras={lixeiras} /> }/>
             <Route path="/peso/:idLixeira" element={<PesoForm />}  />
         </Routes>
