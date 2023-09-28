@@ -11,6 +11,9 @@ const IlhaProvider = ({children}) => {
 
     const carregarIlhas = () => {
         console.log("carregarIlhas...");
+        const agora = new Date();
+        const expireIlhas = new Date(agora.getTime() + 60 * 60 * 1000); 
+
         const fetchIlhas = async () => {
             console.log("iniciando consulta de ilhas");
             const ilhasCollection = collection(firestore, "ilhas");
@@ -22,14 +25,31 @@ const IlhaProvider = ({children}) => {
                     ...doc.data(),
                 }))
             );
+            localStorage.setItem(
+                'ilhas', 
+                JSON.stringify(ilhasSnapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                })))
+            );
+            localStorage.setItem('expireIlhas', expireIlhas);
         };
-        if(ilhas.length === 0) {
+
+        if(!localStorage.getItem('ilhas')) {
             fetchIlhas();
         }
+
+        if(localStorage.getItem('expireIlhas' > agora)){
+            console.log("Dentro do prazo de cache...")
+            return localStorage.getItem('ilhas');
+        }
+
     }
 
     const carregarLixeiras = () => {
         console.log("carregarLixeiras...");
+        const agora = new Date();
+        const expireLixeiras = new Date(agora.getTime() + 60 * 60 * 1000); 
 
         const fetchLixeiras = async () => {
             console.log("iniciando consulta de lixeiras");
@@ -42,12 +62,25 @@ const IlhaProvider = ({children}) => {
                     ...doc.data(),
                 }))
             );
+            localStorage.setItem(
+                'lixeiras', 
+                JSON.stringify(ilhasSnapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                })))
+            );
+            localStorage.setItem('expireLixeiras', expireLixeiras);
         };
 
-        if(lixeiras.length === 0) {
-            console.log("oi")
+        if(!localStorage.getItem('lixeiras')) {
             fetchLixeiras();
         }
+
+        if(localStorage.getItem('expireLixeiras' > agora)){
+            console.log("Dentro do prazo de cache...")
+            return localStorage.getItem('lixeiras');
+        }
+
     }
 
     const ilhaContextData = {

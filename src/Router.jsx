@@ -28,7 +28,7 @@ export function Router() {
 
     useEffect(() => {
         if(ilhas.length === 0) {
-            //carregarIlhas()
+            carregarIlhas();
         }
         if(lixeiras.length === 0) {
            // carregarLixeiras()

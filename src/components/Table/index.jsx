@@ -16,7 +16,7 @@ export function Table({ header }) {
     if(window.location.href.split("/")[3] == "ilha") {
         console.log("entrou case ilha")
         carregarIlhas();
-        data = ilhas;
+        data = JSON.parse(localStorage.getItem('ilhas'));
     }
 
 
