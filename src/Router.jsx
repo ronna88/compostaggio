@@ -10,6 +10,7 @@ import { BuscaForm } from './pages/BuscaForm'
 import { PesoForm } from './pages/PesoForm'
 import { DefaultLayout } from './layout/DefaultLayout'
 import { ListaIlhas } from './components/ListaIlhas'
+import { ListaLixeiras } from './components/ListaLixeiras'
 
 export function Router() {
   // const [listaIlhas, setListaIlhas] = useState([]);
@@ -35,11 +36,8 @@ export function Router() {
         <Route path="/cadastro-ilha" element={<IlhasForm />} />
         <Route path="/ilha/:idIlha" element={<IlhasForm />} />
         <Route path="/ilha" element={<ListaIlhas />} />
-        <Route path="/cadastro-lixeira" element={<IlhasForm />} />
-        <Route
-          path="/lixeira"
-          element={<Listagem componente={<Table header={headerLixeiras} />} />}
-        />
+        <Route path="/cadastro-lixeira" element={<LixeirasForm />} />
+        <Route path="/lixeira" element={<ListaLixeiras />} />
         <Route path="/busca" element={<BuscaForm lixeiras={lixeiras} />} />
         <Route path="/peso/:idLixeira" element={<PesoForm />} />
       </Route>
