@@ -8,6 +8,7 @@ import { useState, useEffect, useContext } from "react";
 import { IlhaContext } from "./contexts/IlhasContext";
 import { BuscaForm } from "./pages/BuscaForm";
 import { PesoForm } from "./pages/PesoForm";
+import { ListaIlhas } from "./components/ListaIlhas";
 
 export function Router() {
 
@@ -39,7 +40,8 @@ export function Router() {
         <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/cadastro-ilha" element={ <IlhasForm /> } />
-            <Route path="/ilha"  element={ <Listagem componente={<Table header={headerIlhas}/>} /> } />
+            <Route path="/ilha"  element={ <ListaIlhas /> } />
+            <Route path="/ilha/:idIlha" element={ <IlhasForm /> } />
             <Route path="/cadastro-lixeira" element={ <LixeirasForm ilhas={ilhas} /> } />
             <Route path="/lixeira"  element={ <Listagem componente={<Table data={lixeiras} header={headerLixeiras}/>} /> } />
             <Route path="/busca" element={ <BuscaForm lixeiras={lixeiras} /> }/>
