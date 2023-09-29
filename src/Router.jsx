@@ -9,6 +9,7 @@ import { IlhaContext } from './contexts/IlhasContext'
 import { BuscaForm } from './pages/BuscaForm'
 import { PesoForm } from './pages/PesoForm'
 import { DefaultLayout } from './layout/DefaultLayout'
+import { ListaIlhas } from './components/ListaIlhas'
 
 export function Router() {
   // const [listaIlhas, setListaIlhas] = useState([]);
@@ -32,14 +33,9 @@ export function Router() {
       <Route path="/" element={<DefaultLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/cadastro-ilha" element={<IlhasForm />} />
-        <Route
-          path="/ilha"
-          element={<Listagem componente={<Table header={headerIlhas} />} />}
-        />
-        <Route
-          path="/cadastro-lixeira"
-          element={<LixeirasForm ilhas={ilhas} />}
-        />
+        <Route path="/ilha/:idIlha" element={<IlhasForm />} />
+        <Route path="/ilha" element={<ListaIlhas />} />
+        <Route path="/cadastro-lixeira" element={<IlhasForm />} />
         <Route
           path="/lixeira"
           element={<Listagem componente={<Table header={headerLixeiras} />} />}
