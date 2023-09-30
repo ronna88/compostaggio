@@ -10,13 +10,13 @@ export function Table({ header }) {
     if (window.location.href.split("/")[3] == "lixeira") {
         console.log("entrou case lixeira");
         carregarLixeiras();
-        data = lixeiras;
+        data = JSON.parse(localStorage.getItem('lixeiras'));
     }
 
     if(window.location.href.split("/")[3] == "ilha") {
         console.log("entrou case ilha")
         carregarIlhas();
-        data = ilhas;
+        data = JSON.parse(localStorage.getItem('ilhas'));
     }
 
 

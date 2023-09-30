@@ -15,29 +15,32 @@ import {
 } from './styles'
 import { PencilSimple, Trash } from '@phosphor-icons/react'
 
-export function ListaIlhas() {
+export function ListaComposteira() {
   const firestore = getFirestore(app)
-  const { carregarIlhas } = useContext(IlhaContext)
-  const [ilhas, setIlhas] = useState([])
+  const [composteiras, setComposteiras] = useState([])
+  const [loading, setLoading] = useState([])
+  const { carregarComposteiras } = useContext(IlhaContext)
   const navigate = useNavigate()
 
   useEffect(() => {
-    console.log(ilhas)
-    if (!localStorage.getItem('ilhas')) {
-      carregarIlhas()
+    console.log(composteiras)
+    if (!localStorage.getItem('composteiras')) {
+      carregarComposteiras()
     }
+    setTimeout(() => {
+      setLoading(false)
+      setComposteiras(JSON.parse(localStorage.getItem('composteiras')))
+    }, 2000)
+  }, [])
 
-    if (ilhas.length === 0) {
-      setIlhas(JSON.parse(localStorage.getItem('ilhas')))
-    }
-  }, [ilhas])
-
-  const deleteIlha = async (ilhaId) => {
-    const ilhaRef = doc(firestore, 'ilhas', ilhaId)
+  const deleteComposteira = async (composteiraId) => {
+    const composteiraRef = doc(firestore, 'composteiras', composteiraId)
     try {
-      await deleteDoc(ilhaRef)
-      console.log('Ilha Excluida')
-      setIlhas((prevList) => prevList.filter((ilha) => ilha.id !== ilhaId))
+      await deleteDoc(composteiraRef)
+      console.log('Composteira Excluida')
+      setComposteiras((prevList) =>
+        prevList.filter((composteira) => composteira.id !== composteiraId),
+      )
     } catch {
       console.log()
     }
@@ -58,33 +61,28 @@ export function ListaIlhas() {
               <tr>
                 <th>ID</th>
                 <th>NOME</th>
-                <th>DESCRIÇÃO</th>
                 <th>AÇÕES</th>
               </tr>
             </thead>
             <tbody>
-              {ilhas ? (
-                ilhas.map((ilha) => {
+              {!loading ? (
+                composteiras.map((composteira) => {
                   return (
-                    <tr key={ilha.id}>
-                      <td>{ilha.id}</td>
-                      <td>{ilha.nome}</td>
-                      <td>{ilha.descricao}</td>
+                    <tr key={composteira.id}>
+                      <td>{composteira.id}</td>
+                      <td>{composteira.nome}</td>
                       <td>
                         <ActionButtons
                           onClick={(e) => {
-                            localStorage.setItem(
-                              'editIlha',
-                              JSON.stringify(ilha),
-                            )
-                            navigate(`/ilha/${ilha.id}`)
+                            e.preventDefault()
+                            navigate(`/composteira/${composteira.id}`)
                           }}
                         >
                           <PencilSimple size={18} color="#f7941e" />
                         </ActionButtons>
                         <ActionButtons
                           onClick={(e) => {
-                            deleteIlha(ilha.id)
+                            deleteComposteira(composteira.id)
                           }}
                         >
                           <Trash size={18} color="#ff0000" />

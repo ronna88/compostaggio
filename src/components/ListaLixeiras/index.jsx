@@ -15,29 +15,44 @@ import {
 } from './styles'
 import { PencilSimple, Trash } from '@phosphor-icons/react'
 
-export function ListaIlhas() {
+export function ListaLixeiras() {
   const firestore = getFirestore(app)
-  const { carregarIlhas } = useContext(IlhaContext)
+  const { carregarLixeiras, carregarIlhas } = useContext(IlhaContext)
+  const [lixeiras, setLixeiras] = useState([])
   const [ilhas, setIlhas] = useState([])
   const navigate = useNavigate()
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    console.log(ilhas)
+    console.log(lixeiras)
+    if (!localStorage.getItem('lixeiras')) {
+      carregarLixeiras()
+    }
     if (!localStorage.getItem('ilhas')) {
       carregarIlhas()
     }
-
-    if (ilhas.length === 0) {
+    setTimeout(() => {
+      setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
+      setLoading(false)
       setIlhas(JSON.parse(localStorage.getItem('ilhas')))
-    }
-  }, [ilhas])
+    }, 2000)
+  }, [])
 
-  const deleteIlha = async (ilhaId) => {
-    const ilhaRef = doc(firestore, 'ilhas', ilhaId)
+  const filterNomeIlha = (ilhaId) => {
+    const ilha = ilhas.find((i) => i.id === ilhaId)
+    if (ilha) {
+      return ilha.nome
+    }
+  }
+
+  const deleteLixeira = async (lixeiraId) => {
+    const lixeiraRef = doc(firestore, 'ilhas', lixeiraId)
     try {
-      await deleteDoc(ilhaRef)
-      console.log('Ilha Excluida')
-      setIlhas((prevList) => prevList.filter((ilha) => ilha.id !== ilhaId))
+      await deleteDoc(lixeiraRef)
+      console.log('Lixeira Excluida')
+      setLixeiras((prevList) =>
+        prevList.filter((lixeira) => lixeira.id !== lixeiraId),
+      )
     } catch {
       console.log()
     }
@@ -59,32 +74,34 @@ export function ListaIlhas() {
                 <th>ID</th>
                 <th>NOME</th>
                 <th>DESCRIÇÃO</th>
+                <th>ILHA</th>
                 <th>AÇÕES</th>
               </tr>
             </thead>
             <tbody>
-              {ilhas ? (
-                ilhas.map((ilha) => {
+              {!loading ? (
+                lixeiras.map((lixeira) => {
                   return (
-                    <tr key={ilha.id}>
-                      <td>{ilha.id}</td>
-                      <td>{ilha.nome}</td>
-                      <td>{ilha.descricao}</td>
+                    <tr key={lixeira.id}>
+                      <td>{lixeira.id}</td>
+                      <td>{lixeira.nome}</td>
+                      <td>{lixeira.descricao}</td>
+                      <td>{filterNomeIlha(lixeira.ilha)}</td>
                       <td>
                         <ActionButtons
                           onClick={(e) => {
                             localStorage.setItem(
-                              'editIlha',
-                              JSON.stringify(ilha),
+                              'editLixeira',
+                              JSON.stringify(lixeira),
                             )
-                            navigate(`/ilha/${ilha.id}`)
+                            navigate(`/lixeira/${lixeira.id}`)
                           }}
                         >
                           <PencilSimple size={18} color="#f7941e" />
                         </ActionButtons>
                         <ActionButtons
                           onClick={(e) => {
-                            deleteIlha(ilha.id)
+                            deleteLixeira(lixeira.id)
                           }}
                         >
                           <Trash size={18} color="#ff0000" />
