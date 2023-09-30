@@ -6,6 +6,7 @@ import {
   getFirestore,
   getDoc,
   doc,
+  updateDoc,
 } from 'firebase/firestore'
 import { useNavigate, useParams } from 'react-router-dom'
 import { IlhaContext } from '../../contexts/IlhasContext'
@@ -32,34 +33,86 @@ export function LixeirasForm() {
   const { carregarIlhas } = useContext(IlhaContext)
 
   const buscarLixeira = async () => {
-    const docRef = doc(firestore, 'lixeiras', idLixeira)
-    const docSnap = await getDoc(docRef)
-    console.log(docSnap.data())
-    setNome(docSnap.data().nome)
-    setDescricao(docSnap.data().descricao)
-    buscarIlha(docSnap.data().ilha)
+    if (localStorage.getItem('lixeiras')) {
+      const lixeira = JSON.parse(localStorage.getItem('lixeiras')).find(
+        (l) => l.id === idLixeira,
+      )
+      setNome(lixeira.nome)
+      setDescricao(lixeira.descricao)
+      buscarIlha(lixeira.ilha)
+    } else {
+      const docRef = doc(firestore, 'lixeiras', idLixeira)
+      const docSnap = await getDoc(docRef)
+      // console.log(docSnap.data())
+      setNome(docSnap.data().nome)
+      setDescricao(docSnap.data().descricao)
+      buscarIlha(docSnap.data().ilha)
+    }
   }
 
   const buscarIlha = async (idIlha) => {
-    const docRef = doc(firestore, 'ilhas', idIlha)
-    const docSnap = await getDoc(docRef)
-    console.log(docSnap.data())
-    setIlha({ ...ilha, nome: docSnap.data().nome })
+    if (localStorage.getItem('ilhas')) {
+      const ilha = JSON.parse(localStorage.getItem('ilhas')).find(
+        (i) => i.id === idIlha,
+      )
+      setIlha({ ...ilha, nome: ilha.nome })
+    } else {
+      const docRef = doc(firestore, 'ilhas', idIlha)
+      const docSnap = await getDoc(docRef)
+      // console.log(docSnap.data())
+      setIlha({ ...ilha, nome: docSnap.data().nome })
+    }
   }
 
   const cadastrarLixeira = () => {
     event.preventDefault()
-    const novaLixeira = {
+    let novaLixeira = {
       nome,
       descricao,
       ilha,
+      created_date: new Date().toLocaleString('pt-BR'),
+      updated_date: new Date().toLocaleString('pt-BR'),
     }
-    console.log(novaLixeira)
     addDoc(collection(firestore, 'lixeiras'), novaLixeira).then((docRef) => {
-      console.log(docRef.id)
+      const lixeiras = JSON.parse(localStorage.getItem('lixeiras'))
+      novaLixeira = { ...novaLixeira, id: docRef.id }
+      console.log(novaLixeira)
+      lixeiras.push(novaLixeira)
+      console.log(lixeiras)
+      localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
+      limpaEstados()
+      navigate('/lixeira')
     })
-    limpaEstados()
-    navigate('/lixeira')
+  }
+
+  const editarLixeira = () => {
+    event.preventDefault()
+    const updatedLixeira = {
+      id: idLixeira,
+      nome,
+      descricao,
+      ilha: ilha.id,
+      updated_date: new Date().toLocaleString('pt-BR'),
+    }
+
+    updateDoc(doc(collection(firestore, 'lixeiras'), idLixeira), updatedLixeira)
+      .then(() => {
+        console.log('Lixeira atualizada')
+        // const lixeiras = JSON.parse(localStorage.getItem('lixeiras')).find(
+        //  (l) => l.id !== idLixeira,
+        // )
+        const lixeiras = JSON.parse(localStorage.getItem('lixeiras')).filter(
+          (lixeira) => lixeira.id !== idLixeira,
+        )
+        console.log(lixeiras)
+        lixeiras.push(updatedLixeira)
+        localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
+        limpaEstados()
+        navigate('/lixeira')
+      })
+      .catch((error) => {
+        console.log(error)
+      })
   }
 
   const limpaEstados = () => {
@@ -123,8 +176,9 @@ export function LixeirasForm() {
               <SelectForm
                 className="form-select"
                 onChange={(e) => setIlha(e.target.value)}
+                value={ilha.id}
               >
-                <option selected>Selecione a Ilha...</option>
+                <option>Selecione a Ilha...</option>
                 {ilhas.map((i) => {
                   return (
                     <option key={i.id} value={i.id}>
@@ -142,10 +196,7 @@ export function LixeirasForm() {
                 Cadastrar
               </SaveButton>
             ) : (
-              <SaveButton
-                onClick={cadastrarLixeira}
-                className="btn btn-primary"
-              >
+              <SaveButton onClick={editarLixeira} className="btn btn-primary">
                 Salvar
               </SaveButton>
             )}

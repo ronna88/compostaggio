@@ -37,6 +37,7 @@ export function Router() {
         <Route path="/ilha/:idIlha" element={<IlhasForm />} />
         <Route path="/ilha" element={<ListaIlhas />} />
         <Route path="/cadastro-lixeira" element={<LixeirasForm />} />
+        <Route path="/lixeira/:idLixeira" element={<LixeirasForm />} />
         <Route path="/lixeira" element={<ListaLixeiras />} />
         <Route path="/busca" element={<BuscaForm lixeiras={lixeiras} />} />
         <Route path="/peso/:idLixeira" element={<PesoForm />} />

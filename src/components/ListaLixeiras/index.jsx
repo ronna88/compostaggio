@@ -17,35 +17,36 @@ import { PencilSimple, Trash } from '@phosphor-icons/react'
 
 export function ListaLixeiras() {
   const firestore = getFirestore(app)
-  const { carregarLixeiras } = useContext(IlhaContext)
+  const { carregarLixeiras, carregarIlhas } = useContext(IlhaContext)
   const [lixeiras, setLixeiras] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [ilhas, setIlhas] = useState([])
   const navigate = useNavigate()
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     console.log(lixeiras)
     if (!localStorage.getItem('lixeiras')) {
-      return carregarLixeiras()
+      carregarLixeiras()
     }
-
-    if (lixeiras.length === 0) {
-      if (JSON.parse(localStorage.getItem('lixeiras')).length === 0) {
-        carregarLixeiras()
-      } else {
-        setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
-      }
+    if (!localStorage.getItem('ilhas')) {
+      carregarIlhas()
     }
+    setTimeout(() => {
+      setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
+      setLoading(false)
+      setIlhas(JSON.parse(localStorage.getItem('ilhas')))
+    }, 2000)
   }, [])
 
-  useEffect(() => {
-    if () {
-
+  const filterNomeIlha = (ilhaId) => {
+    const ilha = ilhas.find((i) => i.id === ilhaId)
+    if (ilha) {
+      return ilha.nome
     }
-  }, [loading])
-
+  }
 
   const deleteLixeira = async (lixeiraId) => {
-    const lixeiraRef = doc(firestore, 'lixeiras', lixeiraId)
+    const lixeiraRef = doc(firestore, 'ilhas', lixeiraId)
     try {
       await deleteDoc(lixeiraRef)
       console.log('Lixeira Excluida')
@@ -78,14 +79,14 @@ export function ListaLixeiras() {
               </tr>
             </thead>
             <tbody>
-              {lixeiras ? (
+              {!loading ? (
                 lixeiras.map((lixeira) => {
                   return (
                     <tr key={lixeira.id}>
                       <td>{lixeira.id}</td>
                       <td>{lixeira.nome}</td>
                       <td>{lixeira.descricao}</td>
-                      <td>{lixeira.ilha}</td>
+                      <td>{filterNomeIlha(lixeira.ilha)}</td>
                       <td>
                         <ActionButtons
                           onClick={(e) => {

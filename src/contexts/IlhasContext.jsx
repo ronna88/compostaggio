@@ -41,7 +41,7 @@ const IlhaProvider = ({ children }) => {
     ) {
       fetchIlhas()
     }
-    if (localStorage.getItem(agora > 'expireIlhas')) {
+    if (agora > localStorage.getItem('expireIlhas')) {
       console.log('Fora do prazo de cache...')
       fetchIlhas()
     }
@@ -80,7 +80,7 @@ const IlhaProvider = ({ children }) => {
     ) {
       fetchLixeiras()
     }
-    if (localStorage.getItem(agora > 'expireLixeiras')) {
+    if (agora > localStorage.getItem('expireLixeiras')) {
       console.log('Fora do prazo de cache...')
       fetchLixeiras()
     }
