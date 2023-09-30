@@ -29,10 +29,16 @@ export function ComposteiraForm() {
   const navigate = useNavigate()
 
   const buscarComposteira = async () => {
-    const docRef = doc(firestore, 'composteiras', idComposteira)
-    const docSnap = await getDoc(docRef)
-    console.log(docSnap.data())
-    setNome(docSnap.data().nome)
+    if (localStorage.getItem('composteiras')) {
+      const composteira = JSON.parse(localStorage.getItem('composteiras')).find(
+        (l) => l.id === idComposteira,
+      )
+      setNome(composteira.nome)
+    } else {
+      const docRef = doc(firestore, 'composteiras', idComposteira)
+      const docSnap = await getDoc(docRef)
+      setNome(docSnap.data().nome)
+    }
   }
 
   useEffect(() => {
@@ -117,7 +123,7 @@ export function ComposteiraForm() {
               <Input
                 type="text"
                 className="form-control"
-                placeholder="Nome da Ilha"
+                placeholder="Nome da Composteira"
                 onChange={(e) => {
                   setNome(e.target.value)
                 }}
