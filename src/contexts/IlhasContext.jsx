@@ -86,12 +86,46 @@ const IlhaProvider = ({ children }) => {
     }
   }
 
+  const carregarComposteiras = () => {
+    console.log('carregarComposteiras...')
+    const agora = new Date()
+    const expireComposteiras = new Date(agora.getTime() + 60 * 60 * 1000)
+
+    const fetchComposteiras = async () => {
+      console.log('Iniciando consulta das composteiras')
+      const composteirasCollection = collection(firestore, 'composteiras')
+      const composteirasSnapshot = await getDocs(composteirasCollection)
+      localStorage.setItem(
+        'composteiras',
+        JSON.stringify(
+          composteirasSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          })),
+        ),
+      )
+      localStorage.setItem('expireComposteiras', expireComposteiras)
+    }
+    if (
+      !localStorage.getItem('composteiras') ||
+      !localStorage.getItem('expireComposteiras') ||
+      JSON.parse(localStorage.getItem('composteiras')).length === 0
+    ) {
+      fetchComposteiras()
+    }
+    if (agora > localStorage.getItem('expireComposteiras')) {
+      console.log('Fora do prazo de cache...')
+      fetchComposteiras()
+    }
+  }
+
   const ilhaContextData = {
     carregarIlhas,
     carregarLixeiras,
     ilhas,
     lixeiras,
     setIlhas,
+    carregarComposteiras,
   }
 
   return (
