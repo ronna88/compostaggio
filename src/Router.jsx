@@ -13,6 +13,7 @@ import { ListaIlhas } from './components/ListaIlhas'
 import { ListaLixeiras } from './components/ListaLixeiras'
 import { ComposteiraForm } from './pages/ComposteirasForm'
 import { ListaComposteira } from './components/ListaComposteiras'
+import { Monitoramento } from './components/Monitoramento'
 
 export function Router() {
   // const [listaIlhas, setListaIlhas] = useState([]);
@@ -49,6 +50,7 @@ export function Router() {
         <Route path="/composteira" element={<ListaComposteira />} />
         <Route path="/busca" element={<BuscaForm lixeiras={lixeiras} />} />
         <Route path="/peso/:idLixeira" element={<PesoForm />} />
+        <Route path="/monitoramento" element={<Monitoramento />} />
       </Route>
     </Routes>
   )
