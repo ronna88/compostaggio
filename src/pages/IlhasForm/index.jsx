@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { app } from '../../services/firebase'
 import {
   addDoc,
@@ -19,10 +19,13 @@ import {
 } from './styles'
 import { useNavigate, useParams } from 'react-router-dom'
 
+import { AuthContext } from '../../contexts/AuthContext'
+
 export function IlhasForm() {
   const [nome, setNome] = useState('')
   const [descricao, setDescricao] = useState('')
   const firestore = getFirestore(app)
+  const { usuario } = useContext(AuthContext)
 
   const [edit, setEdit] = useState(false)
   const { idIlha } = useParams()
@@ -119,7 +122,15 @@ export function IlhasForm() {
                 value={descricao}
               />
             </div>
-
+            <div className="mb-3">
+              <LabelForm className="form-label">USUARIO:</LabelForm>
+              <Input
+                type="text"
+                className="form-control"
+                disabled
+                value={usuario ? usuario.email : ''}
+              />
+            </div>
             {!edit ? (
               <SaveButton onClick={cadastrarIlha} className="btn btn-primary">
                 Cadastrar

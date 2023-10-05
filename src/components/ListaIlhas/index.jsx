@@ -25,10 +25,10 @@ export function ListaIlhas() {
     console.log(ilhas)
     if (!localStorage.getItem('ilhas')) {
       carregarIlhas()
-    }
-
-    if (ilhas.length === 0) {
-      setIlhas(JSON.parse(localStorage.getItem('ilhas')))
+    } else {
+      if (ilhas.length === 0) {
+        setIlhas(JSON.parse(localStorage.getItem('ilhas')))
+      }
     }
   }, [ilhas])
 
