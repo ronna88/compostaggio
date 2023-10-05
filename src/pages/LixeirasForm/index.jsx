@@ -76,9 +76,7 @@ export function LixeirasForm() {
     addDoc(collection(firestore, 'lixeiras'), novaLixeira).then((docRef) => {
       const lixeiras = JSON.parse(localStorage.getItem('lixeiras'))
       novaLixeira = { ...novaLixeira, id: docRef.id }
-      console.log(novaLixeira)
       lixeiras.push(novaLixeira)
-      console.log(lixeiras)
       localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
       limpaEstados()
       navigate('/lixeira')

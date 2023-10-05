@@ -22,7 +22,6 @@ export function ListaIlhas() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    console.log(ilhas)
     if (!localStorage.getItem('ilhas')) {
       carregarIlhas()
     } else {
