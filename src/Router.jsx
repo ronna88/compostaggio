@@ -1,6 +1,5 @@
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { IlhasForm } from './pages/IlhasForm'
-import { Home } from './pages/Home'
 import { Listagem } from './pages/Listagem'
 import { Table } from './components/Table'
 import { LixeirasForm } from './pages/LixeirasForm'
@@ -13,6 +12,8 @@ import { ListaIlhas } from './components/ListaIlhas'
 import { ListaLixeiras } from './components/ListaLixeiras'
 import { ComposteiraForm } from './pages/ComposteirasForm'
 import { ListaComposteira } from './components/ListaComposteiras'
+import { Login } from './pages/Login'
+import Cookies from 'js-cookie'
 
 export function Router() {
   // const [listaIlhas, setListaIlhas] = useState([]);
@@ -31,24 +32,106 @@ export function Router() {
     }
   }, [])
 
+  function PrivateRoute({ children }) {
+    if (Cookies.get('compostagio-auth')) {
+      return <>{children}</>
+    } else {
+      return <Navigate to="/" />
+    }
+  }
+
   return (
     <Routes>
       <Route path="/" element={<DefaultLayout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/cadastro-ilha" element={<IlhasForm />} />
-        <Route path="/ilha/:idIlha" element={<IlhasForm />} />
-        <Route path="/ilha" element={<ListaIlhas />} />
-        <Route path="/cadastro-lixeira" element={<LixeirasForm />} />
-        <Route path="/lixeira/:idLixeira" element={<LixeirasForm />} />
-        <Route path="/lixeira" element={<ListaLixeiras />} />
-        <Route path="/cadastro-composteira" element={<ComposteiraForm />} />
+        <Route path="/" element={<Login />} />
+        <Route
+          path="/cadastro-ilha"
+          element={
+            <PrivateRoute>
+              <IlhasForm />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/ilha/:idIlha"
+          element={
+            <PrivateRoute>
+              <IlhasForm />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/ilha"
+          element={
+            <PrivateRoute>
+              <ListaIlhas />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/cadastro-lixeira"
+          element={
+            <PrivateRoute>
+              <LixeirasForm />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/lixeira/:idLixeira"
+          element={
+            <PrivateRoute>
+              <LixeirasForm />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/lixeira"
+          element={
+            <PrivateRoute>
+              <ListaLixeiras />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/cadastro-composteira"
+          element={
+            <PrivateRoute>
+              <ComposteiraForm />
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/composteira/:idComposteira"
-          element={<ComposteiraForm />}
+          element={
+            <PrivateRoute>
+              <ComposteiraForm />
+            </PrivateRoute>
+          }
         />
-        <Route path="/composteira" element={<ListaComposteira />} />
-        <Route path="/busca" element={<BuscaForm lixeiras={lixeiras} />} />
-        <Route path="/peso/:idLixeira" element={<PesoForm />} />
+        <Route
+          path="/composteira"
+          element={
+            <PrivateRoute>
+              <ListaComposteira />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/busca"
+          element={
+            <PrivateRoute>
+              <BuscaForm lixeiras={lixeiras} />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/peso/:idLixeira"
+          element={
+            <PrivateRoute>
+              <PesoForm />
+            </PrivateRoute>
+          }
+        />
       </Route>
     </Routes>
   )

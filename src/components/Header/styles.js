@@ -34,3 +34,10 @@ export const ButtonMenu = styled(Link)`
     color: ${(props) => props.theme.orange};
   }
 `
+
+export const MenuPrivado = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  gap: 20px;
+`

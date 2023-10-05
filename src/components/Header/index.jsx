@@ -8,24 +8,32 @@ import {
 } from '@phosphor-icons/react'
 import { ContainerHeader, ContentHeader, ButtonMenu } from './styles'
 import IMGLogo from '../../assets/reciclagemLogo.png'
+import { useContext } from 'react'
+import { AuthContext } from '../../contexts/AuthContext'
+import { SignOut } from '@phosphor-icons/react/dist/ssr'
 
 export function Header() {
+  const { usuario, logout } = useContext(AuthContext)
+
+  function sair() {
+    logout()
+  }
   return (
     <ContainerHeader>
       <ContentHeader>
-        <ButtonMenu>
+        <ButtonMenu to="cadastro-lixeira">
           <Recycle />
           <span>CADASTRO DE LIXEIRA</span>
         </ButtonMenu>
-        <ButtonMenu>
+        <ButtonMenu to="/lixeira">
           <Trash />
           <span>LISTAGEM DE LIXEIRA</span>
         </ButtonMenu>
-        <ButtonMenu>
+        <ButtonMenu to="/cadastro-ilha">
           <PlusSquare />
           <span>CADASTRO DE ILHA</span>
         </ButtonMenu>
-        <ButtonMenu>
+        <ButtonMenu to="/ilha">
           <ListDashes />
           <span>LISTAGEM DE ILHA</span>
         </ButtonMenu>
@@ -35,17 +43,25 @@ export function Header() {
           <ListDashes />
           <span>DADOS DE MONITORIAMENTO</span>
         </ButtonMenu>
-        <ButtonMenu>
+        <ButtonMenu to="cadastro-composteira">
           <FileText />
           <span>CADASTRO DE COMPOSTEIRA</span>
         </ButtonMenu>
-        <ButtonMenu>
+        <ButtonMenu to="composteira">
           <ListDashes />
           <span>LISTA DE COMPOSTEIRA</span>
         </ButtonMenu>
         <ButtonMenu>
-          <UserSquare />
-          <span>LOGIN</span>
+          {!usuario ? (
+            <>
+              <UserSquare /> <span>LOGIN</span>
+            </>
+          ) : (
+            <div onClick={() => sair()}>
+              <SignOut />
+              <span>LOGOUT</span>
+            </div>
+          )}
         </ButtonMenu>
       </ContentHeader>
     </ContainerHeader>
