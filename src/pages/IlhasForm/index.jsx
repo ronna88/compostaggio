@@ -53,6 +53,7 @@ export function IlhasForm() {
     const novaIlha = {
       nome,
       descricao,
+      usuario: usuario.email,
       updated_date: new Date().toLocaleString('pt-BR'),
       created_date: new Date().toLocaleString('pt-BR'),
     }
@@ -69,6 +70,7 @@ export function IlhasForm() {
     const updatedIlha = {
       nome,
       descricao,
+      usuario: usuario.email,
       updated_date: new Date().toLocaleString('pt-BR'),
     }
 
