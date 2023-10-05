@@ -1,6 +1,6 @@
 import React from 'react'
 import * as FileSaver from 'file-saver'
-import XLSX from 'sheetjs-style'
+import * as XLSX from 'sheetjs-style'
 
 export function ExportExcel({ fileName, table }) {
   function tableToObj(table) {

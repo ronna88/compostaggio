@@ -84,3 +84,15 @@ export const FormButton = styled.button`
     background-color: #00644e;
   }
 `
+export const DownloadLink = styled.a`
+  border: none;
+  background-color: #f7941e;
+  color: #fff;
+  border-radius: 6px;
+  padding: 3px;
+  width: 70px;
+  text-decoration: none;
+  &:hover {
+    background-color: #00644e;
+  }
+`

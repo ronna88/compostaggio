@@ -21,8 +21,8 @@ import {
   LabelForm,
   FormContainer,
   FormButton,
+  DownloadLink,
 } from './styles'
-import { ExportExcel } from '../ExportExcel'
 
 export function Monitoramento() {
   const firestore = getFirestore(app)
@@ -301,6 +301,25 @@ export function Monitoramento() {
     carregarMonitoramentos(inicio, final)
   }
 
+  const exportData = () => {
+    const tableRows = document.querySelectorAll('tr')
+    const CSVString = Array.from(tableRows)
+      .map((row) =>
+        Array.from(row.cells)
+          .map((cell) => cell.textContent)
+          .join(';'),
+      )
+      .join('\n')
+    document
+      .getElementById('btn-export')
+      .setAttribute(
+        'href',
+        `data:text/csvcharset=utf-8,${encodeURIComponent(CSVString)}`,
+      )
+
+    document.getElementById('btn-export').setAttribute('download', 'table.csv')
+  }
+
   return (
     <Container>
       <Card>
@@ -374,16 +393,15 @@ export function Monitoramento() {
             <div>
               <FormButton onClick={filterData}>Filtrar</FormButton>
             </div>
+            <div>
+              <DownloadLink id="btn-export" onClick={exportData}>
+                Exportar
+              </DownloadLink>
+            </div>
           </FormContainer>
-          <div>
-            <ExportExcel
-              fileName={'Monitoramento'}
-              table={document.getElementsByTagName('table')[0]}
-            />
-          </div>
         </CardHeader>
         <ContainerTable>
-          <TableData>
+          <TableData id="my-table">
             <thead>
               <tr>
                 <th>Data Hora</th>
