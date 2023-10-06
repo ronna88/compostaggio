@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { app } from '../../services/firebase'
 import {
   addDoc,
@@ -19,10 +19,14 @@ import {
 } from './styles'
 import { useNavigate, useParams } from 'react-router-dom'
 
+import { AuthContext } from '../../contexts/AuthContext'
+import { ListaIlhas } from '../../components/ListaIlhas'
+
 export function IlhasForm() {
   const [nome, setNome] = useState('')
   const [descricao, setDescricao] = useState('')
   const firestore = getFirestore(app)
+  const { usuario } = useContext(AuthContext)
 
   const [edit, setEdit] = useState(false)
   const { idIlha } = useParams()
@@ -47,31 +51,42 @@ export function IlhasForm() {
   const cadastrarIlha = () => {
     event.preventDefault()
 
-    const novaIlha = {
+    let novaIlha = {
       nome,
       descricao,
+      usuario: usuario.email,
       updated_date: new Date().toLocaleString('pt-BR'),
       created_date: new Date().toLocaleString('pt-BR'),
     }
-    console.log(novaIlha)
     addDoc(collection(firestore, 'ilhas'), novaIlha).then((docRef) => {
-      console.log(docRef.id)
+      console.log('Ilha Adicionada com Sucesso')
+      const ilhas = JSON.parse(localStorage.getItem('ilhas'))
+      novaIlha = { ...novaIlha, id: docRef.id }
+      ilhas.push(novaIlha)
+      localStorage.setItem('ilhas', JSON.stringify(ilhas))
+      limpaEstados()
+      navigate('/ilha')
     })
-    limpaEstados()
   }
 
   const editarIlha = () => {
     event.preventDefault()
 
     const updatedIlha = {
+      id: idIlha,
       nome,
       descricao,
+      usuario: usuario.email,
       updated_date: new Date().toLocaleString('pt-BR'),
     }
 
     updateDoc(doc(collection(firestore, 'ilhas'), idIlha), updatedIlha)
       .then(() => {
         console.log('Ilha atualizada')
+        const ilhas = JSON.parse(localStorage.getItem('ilhas'))
+        const indexIlha = ilhas.findIndex((ilha) => ilha.id === idIlha)
+        ilhas[indexIlha] = updatedIlha
+        localStorage.setItem('ilhas', JSON.stringify(ilhas))
         limpaEstados()
       })
       .catch((error) => {
@@ -119,7 +134,15 @@ export function IlhasForm() {
                 value={descricao}
               />
             </div>
-
+            <div className="mb-3">
+              <LabelForm className="form-label">USUARIO:</LabelForm>
+              <Input
+                type="text"
+                className="form-control"
+                disabled
+                value={usuario ? usuario.email : ''}
+              />
+            </div>
             {!edit ? (
               <SaveButton onClick={cadastrarIlha} className="btn btn-primary">
                 Cadastrar
