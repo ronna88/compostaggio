@@ -20,6 +20,7 @@ import {
   SelectForm,
   TitleCard,
 } from './styles'
+import { AuthContext } from '../../contexts/AuthContext'
 
 export function LixeirasForm() {
   const [nome, setNome] = useState('')
@@ -31,6 +32,7 @@ export function LixeirasForm() {
   const navigate = useNavigate()
   const firestore = getFirestore(app)
   const { carregarIlhas } = useContext(IlhaContext)
+  const { usuario } = useContext(AuthContext)
 
   const buscarLixeira = async () => {
     if (localStorage.getItem('lixeiras')) {
@@ -70,6 +72,7 @@ export function LixeirasForm() {
       nome,
       descricao,
       ilha,
+      usuario: usuario.email,
       created_date: new Date().toLocaleString('pt-BR'),
       updated_date: new Date().toLocaleString('pt-BR'),
     }
@@ -90,19 +93,15 @@ export function LixeirasForm() {
       nome,
       descricao,
       ilha: ilha.id,
+      usuario: usuario.email,
       updated_date: new Date().toLocaleString('pt-BR'),
     }
 
     updateDoc(doc(collection(firestore, 'lixeiras'), idLixeira), updatedLixeira)
       .then(() => {
-        console.log('Lixeira atualizada')
-        // const lixeiras = JSON.parse(localStorage.getItem('lixeiras')).find(
-        //  (l) => l.id !== idLixeira,
-        // )
         const lixeiras = JSON.parse(localStorage.getItem('lixeiras')).filter(
           (lixeira) => lixeira.id !== idLixeira,
         )
-        console.log(lixeiras)
         lixeiras.push(updatedLixeira)
         localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
         limpaEstados()
@@ -185,6 +184,15 @@ export function LixeirasForm() {
                   )
                 })}
               </SelectForm>
+            </div>
+            <div className="mb-3">
+              <LabelForm className="form-label">USUARIO:</LabelForm>
+              <Input
+                type="text"
+                className="form-control"
+                disabled
+                value={usuario ? usuario.email : ''}
+              />
             </div>
             {!edit ? (
               <SaveButton
