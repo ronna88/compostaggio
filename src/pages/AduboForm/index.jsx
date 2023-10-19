@@ -4,7 +4,6 @@ import {
   addDoc,
   collection,
   getFirestore,
-  getDoc,
   doc,
   updateDoc,
 } from 'firebase/firestore'
@@ -39,14 +38,19 @@ export function AduboForm() {
       created_date: new Date().toLocaleString('pt-BR'),
       updated_date: new Date().toLocaleString('pt-BR'),
     }
-    addDoc(collection(firestore, 'retiradas_adubo'), novaRetirada).then((docRef) => {
-      const retiradas = JSON.parse(localStorage.getItem('retiradas_adubo'))
-      novaRetirada = { ...novaRetirada, id: docRef.id }
-      retiradas.push(novaRetirada)
-      localStorage.setItem('retiradas_adubo', JSON.stringify(retiradas))
-      limpaEstados()
-      navigate('/retiradas')
-    })
+    addDoc(collection(firestore, 'retiradas_adubo'), novaRetirada).then(
+      (docRef) => {
+        const retiradas = []
+        if (localStorage.getItem('retiradas_adubo')) {
+          const retiradas = JSON.parse(localStorage.getItem('retiradas_adubo'))
+        }
+        novaRetirada = { ...novaRetirada, id: docRef.id }
+        retiradas.push(novaRetirada)
+        localStorage.setItem('retiradas_adubo', JSON.stringify(retiradas))
+        limpaEstados()
+        navigate('/ilha')
+      },
+    )
   }
 
   const editarRetiradaAdubo = () => {
@@ -58,11 +62,14 @@ export function AduboForm() {
       updated_date: new Date().toLocaleString('pt-BR'),
     }
 
-    updateDoc(doc(collection(firestore, 'retiradas_adubo'), idAdubo), updatedAdubo)
+    updateDoc(
+      doc(collection(firestore, 'retiradas_adubo'), idAdubo),
+      updatedAdubo,
+    )
       .then(() => {
-        const listaAdubos = JSON.parse(localStorage.getItem('retiradas_adubo')).filter(
-          (adubo) => adubo.id !== idAdubo,
-        )
+        const listaAdubos = JSON.parse(
+          localStorage.getItem('retiradas_adubo'),
+        ).filter((adubo) => adubo.id !== idAdubo)
         listaAdubos.push(updatedAdubo)
         localStorage.setItem('retiradas_adubo', JSON.stringify(listaAdubos))
         limpaEstados()
@@ -151,7 +158,10 @@ export function AduboForm() {
                 Cadastrar
               </SaveButton>
             ) : (
-              <SaveButton onClick={editarRetiradaAdubo} className="btn btn-primary">
+              <SaveButton
+                onClick={editarRetiradaAdubo}
+                className="btn btn-primary"
+              >
                 Salvar
               </SaveButton>
             )}
