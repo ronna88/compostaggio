@@ -6,6 +6,7 @@ import { LixeirasForm } from './pages/LixeirasForm'
 import { useState, useEffect, useContext } from 'react'
 import { IlhaContext } from './contexts/IlhasContext'
 import { BuscaForm } from './pages/BuscaForm'
+import { AduboForm } from './pages/AduboForm'
 import { PesoForm } from './pages/PesoForm'
 import { DefaultLayout } from './layout/DefaultLayout'
 import { ListaIlhas } from './components/ListaIlhas'
@@ -121,6 +122,14 @@ export function Router() {
           element={
             <PrivateRoute>
               <BuscaForm lixeiras={lixeiras} />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/retirada"
+          element={
+            <PrivateRoute>
+              <AduboForm lixeiras={lixeiras} />
             </PrivateRoute>
           }
         />

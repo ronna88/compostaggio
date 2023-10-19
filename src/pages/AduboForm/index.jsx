@@ -22,35 +22,30 @@ import {
 } from './styles'
 
 export function AduboForm() {
+  const [composteira, setComposteira] = useState({ nome: '' })
   const [composteiras, setComposteiras] = useState([])
-  const [nome, setNome] = useState('')
-  const [descricao, setDescricao] = useState('')
-  const [ilha, setIlha] = useState({ nome: '' })
-  const [ilhas, setIlhas] = useState([])
+  const [peso, setPeso] = useState()
   const [edit, setEdit] = useState(false)
   const { idAdubo } = useParams()
   const navigate = useNavigate()
   const firestore = getFirestore(app)
-  const { carregarIlhas, carregarComposteiras } = useContext(IlhaContext)
+  const { carregarComposteiras } = useContext(IlhaContext)
 
   const cadastrarRetiradaAdubo = () => {
     event.preventDefault()
-    let novaLixeira = {
-      nome,
-      descricao,
-      ilha,
+    let novaRetirada = {
+      composteira,
+      peso,
       created_date: new Date().toLocaleString('pt-BR'),
       updated_date: new Date().toLocaleString('pt-BR'),
     }
-    addDoc(collection(firestore, 'lixeiras'), novaLixeira).then((docRef) => {
-      const lixeiras = JSON.parse(localStorage.getItem('lixeiras'))
-      novaLixeira = { ...novaLixeira, id: docRef.id }
-      console.log(novaLixeira)
-      lixeiras.push(novaLixeira)
-      console.log(lixeiras)
-      localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
+    addDoc(collection(firestore, 'retiradas_adubo'), novaRetirada).then((docRef) => {
+      const retiradas = JSON.parse(localStorage.getItem('retiradas_adubo'))
+      novaRetirada = { ...novaRetirada, id: docRef.id }
+      retiradas.push(novaRetirada)
+      localStorage.setItem('retiradas_adubo', JSON.stringify(retiradas))
       limpaEstados()
-      navigate('/lixeira')
+      navigate('/retiradas')
     })
   }
 
@@ -58,21 +53,20 @@ export function AduboForm() {
     event.preventDefault()
     const updatedAdubo = {
       id: idAdubo,
-      nome,
-      descricao,
-      ilha: ilha.id,
+      peso,
+      composteira: ilha.id,
       updated_date: new Date().toLocaleString('pt-BR'),
     }
 
-    updateDoc(doc(collection(firestore, 'adubo'), idAdubo), updatedAdubo)
+    updateDoc(doc(collection(firestore, 'retiradas_adubo'), idAdubo), updatedAdubo)
       .then(() => {
-        const listaAdubos = JSON.parse(localStorage.getItem('adubos')).filter(
+        const listaAdubos = JSON.parse(localStorage.getItem('retiradas_adubo')).filter(
           (adubo) => adubo.id !== idAdubo,
         )
         listaAdubos.push(updatedAdubo)
-        localStorage.setItem('adubos', JSON.stringify(listaAdubos))
+        localStorage.setItem('retiradas_adubo', JSON.stringify(listaAdubos))
         limpaEstados()
-        navigate('/adubo')
+        navigate('/retiradas')
       })
       .catch((error) => {
         console.log(error)
@@ -80,9 +74,8 @@ export function AduboForm() {
   }
 
   const limpaEstados = () => {
-    setNome('')
-    setDescricao('')
-    setIlha({ nome: '' })
+    setPeso('')
+    setComposteira([])
   }
 
   const buscarComposteiras = () => {
@@ -116,44 +109,22 @@ export function AduboForm() {
       <Card>
         <CardHeader>
           {!edit ? (
-            <TitleCard>CADASTRAR LIXEIRAS</TitleCard>
+            <TitleCard>CADASTRAR RETIRADA DE ADUBO</TitleCard>
           ) : (
-            <TitleCard>EDITAR LIXEIRA</TitleCard>
+            <TitleCard>EDITAR RETIRADA DE ADUBO</TitleCard>
           )}
         </CardHeader>
         <div className="card-body">
           <form>
-            <div className="mb-2">
-              <LabelForm>NOME:</LabelForm>
-              <Input
-                type="text"
-                className="form-control"
-                placeholder="Nome da Lixeira"
-                onChange={(e) => {
-                  setNome(e.target.value)
-                }}
-                value={nome}
-              />
-            </div>
-            <div className="mb-2">
-              <LabelForm>DESCRIÇÃO:</LabelForm>
-              <Input
-                type="text"
-                className="form-control"
-                placeholder="Descrição da Lixeira"
-                onChange={(e) => setDescricao(e.target.value)}
-                value={descricao}
-              />
-            </div>
             <div className="mb-3">
-              <LabelForm>ILHA:</LabelForm>
+              <LabelForm>COMPOSTEIRA:</LabelForm>
               <SelectForm
                 className="form-select"
-                onChange={(e) => setIlha(e.target.value)}
-                value={ilha.id}
+                onChange={(e) => setComposteira(e.target.value)}
+                value={composteira.id}
               >
-                <option>Selecione a Ilha...</option>
-                {ilhas.map((i) => {
+                <option>Selecione a Composteira...</option>
+                {composteiras.map((i) => {
                   return (
                     <option key={i.id} value={i.id}>
                       {i.nome}
@@ -162,15 +133,25 @@ export function AduboForm() {
                 })}
               </SelectForm>
             </div>
+            <div className="mb-2">
+              <LabelForm>PESO RETIRADO:</LabelForm>
+              <Input
+                type="text"
+                className="form-control"
+                placeholder="Peso retirado"
+                onChange={(e) => setPeso(e.target.value)}
+                value={peso}
+              />
+            </div>
             {!edit ? (
               <SaveButton
-                onClick={cadastrarLixeira}
+                onClick={cadastrarRetiradaAdubo}
                 className="btn btn-primary"
               >
                 Cadastrar
               </SaveButton>
             ) : (
-              <SaveButton onClick={editarLixeira} className="btn btn-primary">
+              <SaveButton onClick={editarRetiradaAdubo} className="btn btn-primary">
                 Salvar
               </SaveButton>
             )}
