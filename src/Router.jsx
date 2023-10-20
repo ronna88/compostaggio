@@ -14,6 +14,7 @@ import { ComposteiraForm } from './pages/ComposteirasForm'
 import { ListaComposteira } from './components/ListaComposteiras'
 import { Login } from './pages/Login'
 import Cookies from 'js-cookie'
+import { DespejoForm } from './pages/DespejoForm'
 
 export function Router() {
   // const [listaIlhas, setListaIlhas] = useState([]);
@@ -129,6 +130,14 @@ export function Router() {
           element={
             <PrivateRoute>
               <PesoForm />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/despejo"
+          element={
+            <PrivateRoute>
+              <DespejoForm />
             </PrivateRoute>
           }
         />

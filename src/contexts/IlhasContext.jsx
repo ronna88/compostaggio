@@ -119,6 +119,39 @@ const IlhaProvider = ({ children }) => {
     }
   }
 
+  const carregarRotas = () => {
+    console.log('carregarRotas...')
+    const agora = new Date()
+    const expireRotas = new Date(agora.getTime() + 60 * 60 * 1000)
+
+    const fetchRotas = async () => {
+      console.log('Iniciando consulta das rotas')
+      const rotasCollection = collection(firestore, 'rotas')
+      const rotasSnapshot = await getDocs(rotasCollection)
+      localStorage.setItem(
+        'rotas',
+        JSON.stringify(
+          rotasSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          })),
+        ),
+      )
+      localStorage.setItem('expireRotas', expireRotas)
+    }
+    if (
+      !localStorage.getItem('rotas') ||
+      !localStorage.getItem('expireRotas') ||
+      JSON.parse(localStorage.getItem('rotas')).length === 0
+    ) {
+      fetchRotas()
+    }
+    if (agora > localStorage.getItem('expireRotas')) {
+      console.log('Fora do prazo de cache...')
+      fetchRotas()
+    }
+  }
+
   const ilhaContextData = {
     carregarIlhas,
     carregarLixeiras,
@@ -126,6 +159,7 @@ const IlhaProvider = ({ children }) => {
     lixeiras,
     setIlhas,
     carregarComposteiras,
+    carregarRotas,
   }
 
   return (
