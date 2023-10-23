@@ -179,7 +179,16 @@ export function DespejoForm() {
                 <option>Selecione a pesagem realizada...</option>
                 {rotas
                   ? rotas.map((r) => {
-                      return <option value={r.idLixeira}>{` ${r.date.toString()}`}</option>
+                      const data = new Date(r.date.seconds*1000)
+                      console.log(data)
+                      return (
+                        <option value={r.idLixeira}>{`${data
+                          .getDate()
+                          .toString()
+                          .padStart(2, '0')}/${(data.getMonth() + 1)
+                          .toString()
+                          .padStart(2, '0')}/${data.getFullYear()}`}</option>
+                      )
                     })
                   : ''}
               </SelectForm>
