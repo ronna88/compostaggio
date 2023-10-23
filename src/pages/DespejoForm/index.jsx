@@ -1,20 +1,12 @@
 import { useContext, useEffect, useState } from 'react'
 import { app } from '../../services/firebase'
-import {
-  addDoc,
-  collection,
-  getFirestore,
-  getDoc,
-  doc,
-  updateDoc,
-} from 'firebase/firestore'
+import { addDoc, collection, getFirestore } from 'firebase/firestore'
 import { useNavigate, useParams } from 'react-router-dom'
 import { IlhaContext } from '../../contexts/IlhasContext'
 import {
   Card,
   CardHeader,
   Container,
-  Input,
   LabelForm,
   SaveButton,
   SelectForm,
@@ -22,92 +14,45 @@ import {
 } from './styles'
 
 export function DespejoForm() {
-  const [nome, setNome] = useState('')
-  const [descricao, setDescricao] = useState('')
-  const [ilha, setIlha] = useState({ nome: '' })
   const [lixeiras, setLixeiras] = useState([])
-  const [lixeira, setLixeira] = useState([])
+  const [composteira, setComposteira] = useState([])
   const [edit, setEdit] = useState(false)
   const [rotas, setRotas] = useState([])
   const [rota, setRota] = useState({ id: '' })
   const navigate = useNavigate()
   const firestore = getFirestore(app)
   const { idDespejo } = useParams()
-  const { carregarLixeiras, carregarRotas } = useContext(IlhaContext)
+  const {
+    carregarLixeiras,
+    carregarRotas,
+    carregarComposteiras,
+    composteiras,
+    setComposteiras,
+  } = useContext(IlhaContext)
 
-  /*
-  const buscarLixeira = async () => {
-    if (localStorage.getItem('lixeiras')) {
-      const lixeira = JSON.parse(localStorage.getItem('lixeiras')).find(
-        (l) => l.id === idLixeira,
-      )
-      setNome(lixeira.nome)
-      setDescricao(lixeira.descricao)
-      buscarIlha(lixeira.ilha)
-    } else {
-      const docRef = doc(firestore, 'lixeiras', idLixeira)
-      const docSnap = await getDoc(docRef)
-      // console.log(docSnap.data())
-      setNome(docSnap.data().nome)
-      setDescricao(docSnap.data().descricao)
-      buscarIlha(docSnap.data().ilha)
-    }
-  }
-  */
-
-  const cadastrarLixeira = () => {
+  const cadastrarDespejo = () => {
     event.preventDefault()
-    let novaLixeira = {
-      nome,
-      descricao,
-      ilha,
+    let novoDespejo = {
+      rota,
+      composteira,
       created_date: new Date().toLocaleString('pt-BR'),
       updated_date: new Date().toLocaleString('pt-BR'),
     }
-    addDoc(collection(firestore, 'lixeiras'), novaLixeira).then((docRef) => {
-      const lixeiras = JSON.parse(localStorage.getItem('lixeiras'))
-      novaLixeira = { ...novaLixeira, id: docRef.id }
-      console.log(novaLixeira)
-      lixeiras.push(novaLixeira)
-      console.log(lixeiras)
-      localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
+    addDoc(collection(firestore, 'despejos'), novoDespejo).then((docRef) => {
+      const despejos = JSON.parse(localStorage.getItem('despejos'))
+      novoDespejo = { ...novoDespejo, id: docRef.id }
+      console.log(novoDespejo)
+      despejos.push(novoDespejo)
+      console.log(despejos)
+      localStorage.setItem('despejos', JSON.stringify(despejos))
       limpaEstados()
-      navigate('/lixeira')
+      navigate('/despejo')
     })
   }
 
-  /*
-  const editarLixeira = () => {
-    event.preventDefault()
-    const updatedLixeira = {
-      id: idLixeira,
-      nome,
-      descricao,
-      ilha: ilha.id,
-      updated_date: new Date().toLocaleString('pt-BR'),
-    }
-
-    updateDoc(doc(collection(firestore, 'lixeiras'), idLixeira), updatedLixeira)
-      .then(() => {
-        const lixeiras = JSON.parse(localStorage.getItem('lixeiras')).filter(
-          (lixeira) => lixeira.id !== idLixeira,
-        )
-        console.log(lixeiras)
-        lixeiras.push(updatedLixeira)
-        localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
-        limpaEstados()
-        navigate('/lixeira')
-      })
-      .catch((error) => {
-        console.log(error)
-      })
-  }
-  */
-
   const limpaEstados = () => {
-    setNome('')
-    setDescricao('')
-    setIlha({ nome: '' })
+    setRota('')
+    setComposteira('')
   }
 
   const filterRotasLivres = () => {
@@ -116,9 +61,7 @@ export function DespejoForm() {
     const rt = JSON.parse(localStorage.getItem('rotas'))
     const rtTemp = []
     for (let i = 0; i < rt.length; i++) {
-      console.log('oiiiii')
       if (!rt[i.livre]) {
-        console.log('livre')
         rtTemp.push(rt[i])
         console.log(rt[i])
       }
@@ -127,12 +70,11 @@ export function DespejoForm() {
     setRotas(rtTemp)
   }
 
+  const buscaLixeira = (idLixeira) => {
+    return lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0]
+  }
+
   useEffect(() => {
-    filterRotasLivres()
-    if (idDespejo) {
-      setEdit(true)
-      // buscarLixeira()
-    }
     if (
       !localStorage.getItem('lixeiras') ||
       localStorage.getItem('lixeiras').length === 0
@@ -150,12 +92,15 @@ export function DespejoForm() {
     }
     if (localStorage.getItem('rotas')) {
       setRotas(JSON.parse(localStorage.getItem('rotas')))
+      filterRotasLivres()
+    }
+    if (!localStorage.getItem('composteiras')) {
+      carregarComposteiras()
+    }
+    if (localStorage.getItem('composteiras') && composteiras.length === 0) {
+      setComposteiras(JSON.parse(localStorage.getItem('composteiras')))
     }
   }, [])
-
-  useEffect(() => {
-    console.log(rotas)
-  }, [rotas])
 
   return (
     <Container>
@@ -179,15 +124,37 @@ export function DespejoForm() {
                 <option>Selecione a pesagem realizada...</option>
                 {rotas
                   ? rotas.map((r) => {
-                      const data = new Date(r.date.seconds*1000)
-                      console.log(data)
+                      const data = new Date(r.date.seconds * 1000)
+
                       return (
-                        <option value={r.idLixeira}>{`${data
+                        <option key={r.id} value={r.id}>{`${data
                           .getDate()
                           .toString()
                           .padStart(2, '0')}/${(data.getMonth() + 1)
                           .toString()
-                          .padStart(2, '0')}/${data.getFullYear()}`}</option>
+                          .padStart(2, '0')}/${data.getFullYear()} - 
+                          ${data.getHours()}:${data.getMinutes()} - 
+                          ${buscaLixeira(r.idLixeira).descricao}`}</option>
+                      )
+                    })
+                  : ''}
+              </SelectForm>
+            </div>
+            <div className="mb-3">
+              <LabelForm>COMPOSTEIRA:</LabelForm>
+              <SelectForm
+                className="form-select"
+                onChange={(e) => setComposteira(e.target.value)}
+                value={composteira.id}
+              >
+                <option>
+                  Selecione a composteira onde será despejado o resíduo...
+                </option>
+                {composteiras
+                  ? composteiras.map((c) => {
+                      console.log(c)
+                      return (
+                        <option key={c.id} value={c.id}>{`${c.nome}`}</option>
                       )
                     })
                   : ''}
@@ -195,14 +162,14 @@ export function DespejoForm() {
             </div>
             {!edit ? (
               <SaveButton
-                onClick={cadastrarLixeira}
+                onClick={cadastrarDespejo}
                 className="btn btn-primary"
               >
                 Cadastrar
               </SaveButton>
             ) : (
               <SaveButton
-                onClick={cadastrarLixeira}
+                onClick={cadastrarDespejo}
                 className="btn btn-primary"
               >
                 Salvar

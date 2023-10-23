@@ -8,6 +8,7 @@ const firestore = getFirestore(app)
 const IlhaProvider = ({ children }) => {
   const [ilhas, setIlhas] = useState([])
   const [lixeiras, setLixeiras] = useState([])
+  const [composteiras, setComposteiras] = useState([])
 
   const carregarIlhas = () => {
     console.log('carregarIlhas...')
@@ -105,6 +106,7 @@ const IlhaProvider = ({ children }) => {
         ),
       )
       localStorage.setItem('expireComposteiras', expireComposteiras)
+      setComposteiras(JSON.stringify(localStorage.getItem('composteiras')))
     }
     if (
       !localStorage.getItem('composteiras') ||
@@ -160,6 +162,8 @@ const IlhaProvider = ({ children }) => {
     setIlhas,
     carregarComposteiras,
     carregarRotas,
+    composteiras,
+    setComposteiras,
   }
 
   return (
