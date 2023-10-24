@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
 import { app } from '../../services/firebase'
 import {
   addDoc,
@@ -18,11 +18,12 @@ import {
   LabelForm,
 } from './styles'
 import { useNavigate, useParams } from 'react-router-dom'
+import { AuthContext } from '../../contexts/AuthContext'
 
 export function ComposteiraForm() {
   const [nome, setNome] = useState('')
   const firestore = getFirestore(app)
-
+  const { usuario } = useContext(AuthContext)
   const [edit, setEdit] = useState(false)
   const { idComposteira } = useParams()
 
@@ -53,6 +54,7 @@ export function ComposteiraForm() {
 
     let novaComposteira = {
       nome,
+      usuario: usuario.email,
       updated_date: new Date().toLocaleString('pt-BR'),
       created_date: new Date().toLocaleString('pt-BR'),
     }
@@ -78,6 +80,7 @@ export function ComposteiraForm() {
     const updatedComposteira = {
       id: idComposteira,
       nome,
+      usuario: usuario.email,
       updated_date: new Date().toLocaleString('pt-BR'),
     }
 
@@ -130,7 +133,15 @@ export function ComposteiraForm() {
                 value={nome}
               />
             </div>
-
+            <div className="mb-3">
+              <LabelForm className="form-label">USUARIO:</LabelForm>
+              <Input
+                type="text"
+                className="form-control"
+                disabled
+                value={usuario ? usuario.email : ''}
+              />
+            </div>
             {!edit ? (
               <SaveButton
                 onClick={cadastrarComposteira}
