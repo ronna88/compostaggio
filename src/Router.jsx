@@ -13,8 +13,10 @@ import { ListaIlhas } from './components/ListaIlhas'
 import { ListaLixeiras } from './components/ListaLixeiras'
 import { ComposteiraForm } from './pages/ComposteirasForm'
 import { ListaComposteira } from './components/ListaComposteiras'
+import { Monitoramento } from './components/Monitoramento'
 import { Login } from './pages/Login'
 import Cookies from 'js-cookie'
+
 
 export function Router() {
   // const [listaIlhas, setListaIlhas] = useState([]);
@@ -141,6 +143,16 @@ export function Router() {
             </PrivateRoute>
           }
         />
+            
+        <Route
+          path="/monitoramento"
+          element={
+            <PrivateRoute>
+              <Monitoramento />
+            </PrivateRoute>
+          }
+        />
+
       </Route>
     </Routes>
   )
