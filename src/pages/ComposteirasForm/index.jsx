@@ -19,6 +19,7 @@ import {
 } from './styles'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AuthContext } from '../../contexts/AuthContext'
+import { toast } from 'react-toastify'
 
 export function ComposteiraForm() {
   const [nome, setNome] = useState('')
@@ -32,7 +33,7 @@ export function ComposteiraForm() {
   const buscarComposteira = async () => {
     if (localStorage.getItem('composteiras')) {
       const composteira = JSON.parse(localStorage.getItem('composteiras')).find(
-        (l) => l.id === idComposteira,
+        (l) => l.id === idComposteira
       )
       setNome(composteira.nome)
     } else {
@@ -52,30 +53,40 @@ export function ComposteiraForm() {
   const cadastrarComposteira = () => {
     event.preventDefault()
 
+    if (!nome || !usuario) {
+      toast.warning('Por favor, preencha todos os campos.')
+      return
+    }
+
     let novaComposteira = {
       nome,
       usuario: usuario.email,
       updated_date: new Date().toLocaleString('pt-BR'),
       created_date: new Date().toLocaleString('pt-BR'),
     }
-    console.log(novaComposteira)
+
     addDoc(collection(firestore, 'composteiras'), novaComposteira).then(
       (docRef) => {
         const composteiras = JSON.parse(localStorage.getItem('composteiras'))
         novaComposteira = { ...novaComposteira, id: docRef.id }
-        console.log(novaComposteira)
+
         composteiras.push(novaComposteira)
         console.log(composteiras)
         localStorage.setItem('composteiras', JSON.stringify(composteiras))
         limpaEstados()
         navigate('/composteira')
-      },
+      }
     )
     limpaEstados()
   }
 
   const editarComposteira = () => {
     event.preventDefault()
+
+    if (!idComposteira || !nome || !usuario) {
+      toast.warning('Por favor, preencha todos os campos.')
+      return
+    }
 
     const updatedComposteira = {
       id: idComposteira,
@@ -86,12 +97,12 @@ export function ComposteiraForm() {
 
     updateDoc(
       doc(collection(firestore, 'composteiras'), idComposteira),
-      updatedComposteira,
+      updatedComposteira
     )
       .then(() => {
         console.log('Composteira atualizada')
         const composteiras = JSON.parse(
-          localStorage.getItem('composteiras'),
+          localStorage.getItem('composteiras')
         ).filter((composteira) => composteira.id !== idComposteira)
         console.log(composteiras)
         composteiras.push(updatedComposteira)

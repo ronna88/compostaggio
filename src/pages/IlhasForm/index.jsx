@@ -21,6 +21,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 import { AuthContext } from '../../contexts/AuthContext'
 import { ListaIlhas } from '../../components/ListaIlhas'
+import { toast } from 'react-toastify'
 
 export function IlhasForm() {
   const [nome, setNome] = useState('')
@@ -58,6 +59,12 @@ export function IlhasForm() {
       updated_date: new Date().toLocaleString('pt-BR'),
       created_date: new Date().toLocaleString('pt-BR'),
     }
+
+    if (!nome || !descricao || usuario) {
+      toast.warning('Por favor, preencha todos os campos.')
+      return
+    }
+
     addDoc(collection(firestore, 'ilhas'), novaIlha).then((docRef) => {
       console.log('Ilha Adicionada com Sucesso')
       const ilhas = JSON.parse(localStorage.getItem('ilhas'))
@@ -78,6 +85,11 @@ export function IlhasForm() {
       descricao,
       usuario: usuario.email,
       updated_date: new Date().toLocaleString('pt-BR'),
+    }
+
+    if (!idIlha || !nome || !descricao || usuario) {
+      toast.warning('Por favor, preencha todos os campos.')
+      return
     }
 
     updateDoc(doc(collection(firestore, 'ilhas'), idIlha), updatedIlha)
