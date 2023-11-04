@@ -19,6 +19,7 @@ import {
   SelectForm,
   TitleCard,
 } from './styles'
+import { toast } from 'react-toastify'
 
 export function AduboForm() {
   const [composteira, setComposteira] = useState({ nome: '' })
@@ -32,6 +33,12 @@ export function AduboForm() {
 
   const cadastrarRetiradaAdubo = () => {
     event.preventDefault()
+
+    if (!composteira || !peso) {
+      toast.warning('Por favor, preencha todos os campos.')
+      return
+    }
+
     let novaRetirada = {
       composteira,
       peso,
@@ -49,12 +56,17 @@ export function AduboForm() {
         localStorage.setItem('retiradas_adubo', JSON.stringify(retiradas))
         limpaEstados()
         navigate('/ilha')
-      },
+      }
     )
   }
 
   const editarRetiradaAdubo = () => {
     event.preventDefault()
+    if (!idAdubo || !peso || ilha.id) {
+      toast.warning('Por favor, preencha todos os campos.')
+      return
+    }
+
     const updatedAdubo = {
       id: idAdubo,
       peso,
@@ -64,11 +76,11 @@ export function AduboForm() {
 
     updateDoc(
       doc(collection(firestore, 'retiradas_adubo'), idAdubo),
-      updatedAdubo,
+      updatedAdubo
     )
       .then(() => {
         const listaAdubos = JSON.parse(
-          localStorage.getItem('retiradas_adubo'),
+          localStorage.getItem('retiradas_adubo')
         ).filter((adubo) => adubo.id !== idAdubo)
         listaAdubos.push(updatedAdubo)
         localStorage.setItem('retiradas_adubo', JSON.stringify(listaAdubos))

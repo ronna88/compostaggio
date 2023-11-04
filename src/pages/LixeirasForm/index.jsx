@@ -21,6 +21,7 @@ import {
   TitleCard,
 } from './styles'
 import { AuthContext } from '../../contexts/AuthContext'
+import { toast } from 'react-toastify'
 
 export function LixeirasForm() {
   const [nome, setNome] = useState('')
@@ -37,7 +38,7 @@ export function LixeirasForm() {
   const buscarLixeira = async () => {
     if (localStorage.getItem('lixeiras')) {
       const lixeira = JSON.parse(localStorage.getItem('lixeiras')).find(
-        (l) => l.id === idLixeira,
+        (l) => l.id === idLixeira
       )
       setNome(lixeira.nome)
       setDescricao(lixeira.descricao)
@@ -55,7 +56,7 @@ export function LixeirasForm() {
   const buscarIlha = async (idIlha) => {
     if (localStorage.getItem('ilhas')) {
       const ilha = JSON.parse(localStorage.getItem('ilhas')).find(
-        (i) => i.id === idIlha,
+        (i) => i.id === idIlha
       )
       setIlha({ ...ilha, nome: ilha.nome })
     } else {
@@ -66,8 +67,14 @@ export function LixeirasForm() {
     }
   }
 
-  const cadastrarLixeira = () => {
+  const cadastrarLixeira = (event) => {
     event.preventDefault()
+
+    if (!nome || !descricao || !ilha || !usuario.email) {
+      toast.warning('Por favor, preencha todos os campos.')
+      return
+    }
+
     let novaLixeira = {
       nome,
       descricao,
@@ -77,10 +84,17 @@ export function LixeirasForm() {
       updated_date: new Date().toLocaleString('pt-BR'),
     }
     addDoc(collection(firestore, 'lixeiras'), novaLixeira).then((docRef) => {
-      const lixeiras = JSON.parse(localStorage.getItem('lixeiras'))
-      novaLixeira = { ...novaLixeira, id: docRef.id }
-      lixeiras.push(novaLixeira)
-      localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
+      if (localStorage.getItem('lixeiras')) {
+        // 'lixeiras' já existe, você pode fazer o JSON.parse
+        const lixeiras = JSON.parse(localStorage.getItem('lixeiras'))
+        novaLixeira = { ...novaLixeira, id: docRef.id }
+        lixeiras.push(novaLixeira)
+        localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
+      } else {
+        // 'lixeiras' não existe no localStorage, crie um novo array
+        const lixeiras = [novaLixeira]
+        localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
+      }
       limpaEstados()
       navigate('/lixeira')
     })
@@ -100,7 +114,7 @@ export function LixeirasForm() {
     updateDoc(doc(collection(firestore, 'lixeiras'), idLixeira), updatedLixeira)
       .then(() => {
         const lixeiras = JSON.parse(localStorage.getItem('lixeiras')).filter(
-          (lixeira) => lixeira.id !== idLixeira,
+          (lixeira) => lixeira.id !== idLixeira
         )
         lixeiras.push(updatedLixeira)
         localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
