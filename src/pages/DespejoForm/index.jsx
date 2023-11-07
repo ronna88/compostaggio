@@ -1,6 +1,12 @@
 import { useContext, useEffect, useState } from 'react'
 import { app } from '../../services/firebase'
-import { addDoc, collection, getFirestore } from 'firebase/firestore'
+import {
+  addDoc,
+  collection,
+  getFirestore,
+  updateDoc,
+  doc,
+} from 'firebase/firestore'
 import { useNavigate, useParams } from 'react-router-dom'
 import { IlhaContext } from '../../contexts/IlhasContext'
 import {
@@ -39,11 +45,14 @@ export function DespejoForm() {
       updated_date: new Date().toLocaleString('pt-BR'),
     }
     addDoc(collection(firestore, 'despejos'), novoDespejo).then((docRef) => {
-      const despejos = JSON.parse(localStorage.getItem('despejos'))
+      let despejos = []
+      if (localStorage.getItem('despejos')) {
+        despejos = JSON.parse(localStorage.getItem('despejos'))
+      }
       novoDespejo = { ...novoDespejo, id: docRef.id }
-      console.log(novoDespejo)
+      // console.log(novoDespejo)
       despejos.push(novoDespejo)
-      console.log(despejos)
+      // console.log(despejos)
       localStorage.setItem('despejos', JSON.stringify(despejos))
       limpaEstados()
       navigate('/despejo')
@@ -59,15 +68,29 @@ export function DespejoForm() {
     // Função para filtrar as rotas que ainda não foram despejadas na composteira
     // para liberar a seleção destas.
     const rt = JSON.parse(localStorage.getItem('rotas'))
-    const rtTemp = []
+    const rtTemp = rt.filter((rota) => rota.livre !== 'nao')
+
+    /*
     for (let i = 0; i < rt.length; i++) {
       if (!rt[i.livre]) {
         rtTemp.push(rt[i])
         console.log(rt[i])
       }
-    }
+    } */
     console.log(rtTemp)
     setRotas(rtTemp)
+  }
+
+  const updateRota = (idRota) => {
+    updateDoc(doc(collection(firestore, 'rotas'), idRota), updatedRota).then(
+      () => {
+        const rotas = JSON.parse(localStorage.getItem('rotas')).filter(
+          (rota) => rota.id !== idRota,
+        )
+        rotas.push(updatedRota)
+        localStorage.setItem('rotas', JSON.stringify(rotas))
+      },
+    )
   }
 
   const buscaLixeira = (idLixeira) => {
@@ -152,7 +175,7 @@ export function DespejoForm() {
                 </option>
                 {composteiras
                   ? composteiras.map((c) => {
-                      console.log(c)
+                      // console.log(c)
                       return (
                         <option key={c.id} value={c.id}>{`${c.nome}`}</option>
                       )
