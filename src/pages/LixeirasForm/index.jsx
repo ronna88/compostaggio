@@ -20,6 +20,8 @@ import {
   SelectForm,
   TitleCard,
 } from './styles'
+import { AuthContext } from '../../contexts/AuthContext'
+import { toast } from 'react-toastify'
 
 export function LixeirasForm() {
   const [nome, setNome] = useState('')
@@ -31,11 +33,12 @@ export function LixeirasForm() {
   const navigate = useNavigate()
   const firestore = getFirestore(app)
   const { carregarIlhas } = useContext(IlhaContext)
+  const { usuario } = useContext(AuthContext)
 
   const buscarLixeira = async () => {
     if (localStorage.getItem('lixeiras')) {
       const lixeira = JSON.parse(localStorage.getItem('lixeiras')).find(
-        (l) => l.id === idLixeira,
+        (l) => l.id === idLixeira
       )
       setNome(lixeira.nome)
       setDescricao(lixeira.descricao)
@@ -53,7 +56,7 @@ export function LixeirasForm() {
   const buscarIlha = async (idIlha) => {
     if (localStorage.getItem('ilhas')) {
       const ilha = JSON.parse(localStorage.getItem('ilhas')).find(
-        (i) => i.id === idIlha,
+        (i) => i.id === idIlha
       )
       setIlha({ ...ilha, nome: ilha.nome })
     } else {
@@ -64,22 +67,34 @@ export function LixeirasForm() {
     }
   }
 
-  const cadastrarLixeira = () => {
+  const cadastrarLixeira = (event) => {
     event.preventDefault()
+
+    if (!nome || !descricao || !ilha || !usuario.email) {
+      toast.warning('Por favor, preencha todos os campos.')
+      return
+    }
+
     let novaLixeira = {
       nome,
       descricao,
       ilha,
+      usuario: usuario.email,
       created_date: new Date().toLocaleString('pt-BR'),
       updated_date: new Date().toLocaleString('pt-BR'),
     }
     addDoc(collection(firestore, 'lixeiras'), novaLixeira).then((docRef) => {
-      const lixeiras = JSON.parse(localStorage.getItem('lixeiras'))
-      novaLixeira = { ...novaLixeira, id: docRef.id }
-      console.log(novaLixeira)
-      lixeiras.push(novaLixeira)
-      console.log(lixeiras)
-      localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
+      if (localStorage.getItem('lixeiras')) {
+        // 'lixeiras' já existe, você pode fazer o JSON.parse
+        const lixeiras = JSON.parse(localStorage.getItem('lixeiras'))
+        novaLixeira = { ...novaLixeira, id: docRef.id }
+        lixeiras.push(novaLixeira)
+        localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
+      } else {
+        // 'lixeiras' não existe no localStorage, crie um novo array
+        const lixeiras = [novaLixeira]
+        localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
+      }
       limpaEstados()
       navigate('/lixeira')
     })
@@ -92,19 +107,15 @@ export function LixeirasForm() {
       nome,
       descricao,
       ilha: ilha.id,
+      usuario: usuario.email,
       updated_date: new Date().toLocaleString('pt-BR'),
     }
 
     updateDoc(doc(collection(firestore, 'lixeiras'), idLixeira), updatedLixeira)
       .then(() => {
-        console.log('Lixeira atualizada')
-        // const lixeiras = JSON.parse(localStorage.getItem('lixeiras')).find(
-        //  (l) => l.id !== idLixeira,
-        // )
         const lixeiras = JSON.parse(localStorage.getItem('lixeiras')).filter(
-          (lixeira) => lixeira.id !== idLixeira,
+          (lixeira) => lixeira.id !== idLixeira
         )
-        console.log(lixeiras)
         lixeiras.push(updatedLixeira)
         localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
         limpaEstados()
@@ -187,6 +198,15 @@ export function LixeirasForm() {
                   )
                 })}
               </SelectForm>
+            </div>
+            <div className="mb-3">
+              <LabelForm className="form-label">USUARIO:</LabelForm>
+              <Input
+                type="text"
+                className="form-control"
+                disabled
+                value={usuario ? usuario.email : ''}
+              />
             </div>
             {!edit ? (
               <SaveButton

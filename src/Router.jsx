@@ -6,14 +6,17 @@ import { LixeirasForm } from './pages/LixeirasForm'
 import { useState, useEffect, useContext } from 'react'
 import { IlhaContext } from './contexts/IlhasContext'
 import { BuscaForm } from './pages/BuscaForm'
+import { AduboForm } from './pages/AduboForm'
 import { PesoForm } from './pages/PesoForm'
 import { DefaultLayout } from './layout/DefaultLayout'
 import { ListaIlhas } from './components/ListaIlhas'
 import { ListaLixeiras } from './components/ListaLixeiras'
 import { ComposteiraForm } from './pages/ComposteirasForm'
 import { ListaComposteira } from './components/ListaComposteiras'
+import { Monitoramento } from './components/Monitoramento'
 import { Login } from './pages/Login'
 import Cookies from 'js-cookie'
+
 
 export function Router() {
   // const [listaIlhas, setListaIlhas] = useState([]);
@@ -125,6 +128,14 @@ export function Router() {
           }
         />
         <Route
+          path="/retirada"
+          element={
+            <PrivateRoute>
+              <AduboForm lixeiras={lixeiras} />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/peso/:idLixeira"
           element={
             <PrivateRoute>
@@ -132,6 +143,16 @@ export function Router() {
             </PrivateRoute>
           }
         />
+            
+        <Route
+          path="/monitoramento"
+          element={
+            <PrivateRoute>
+              <Monitoramento />
+            </PrivateRoute>
+          }
+        />
+
       </Route>
     </Routes>
   )

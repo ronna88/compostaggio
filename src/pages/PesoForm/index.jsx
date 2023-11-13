@@ -3,6 +3,7 @@ import { app } from '../../services/firebase'
 import { addDoc, collection, getFirestore } from 'firebase/firestore'
 import ReactDatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
+
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   Card,
@@ -13,6 +14,7 @@ import {
   SaveButton,
   TitleCard,
 } from './styles'
+import { toast } from 'react-toastify'
 
 export function PesoForm() {
   const [rota, setRota] = useState('')
@@ -20,7 +22,6 @@ export function PesoForm() {
   const [date, setDate] = useState(new Date())
   const navigate = useNavigate()
   const { idLixeira } = useParams()
-
   const firestore = getFirestore(app)
 
   const salvarRota = () => {
@@ -32,7 +33,10 @@ export function PesoForm() {
       idLixeira,
       livre: 'sim',
     }
-
+    if (!peso || !date) {
+      toast.warning('Por favor, preencha todos os campos.')
+      return
+    }
     addDoc(collection(firestore, 'rotas'), novaRota).then((docRef) => {
       console.log(docRef.id)
     })
