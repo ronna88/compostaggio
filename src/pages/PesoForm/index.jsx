@@ -3,15 +3,25 @@ import { app } from '../../services/firebase'
 import { addDoc, collection, getFirestore } from 'firebase/firestore'
 import ReactDatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
-import { useNavigate } from 'react-router-dom'
+
+import { useNavigate, useParams } from 'react-router-dom'
+import {
+  Card,
+  CardHeader,
+  Container,
+  Input,
+  LabelForm,
+  SaveButton,
+  TitleCard,
+} from './styles'
 import { toast } from 'react-toastify'
 
-export function PesoForm({ ilhas, lixeiras }) {
+export function PesoForm() {
   const [rota, setRota] = useState('')
   const [peso, setPeso] = useState('')
   const [date, setDate] = useState(new Date())
   const navigate = useNavigate()
-
+  const { idLixeira } = useParams()
   const firestore = getFirestore(app)
 
   const salvarRota = () => {
@@ -20,14 +30,13 @@ export function PesoForm({ ilhas, lixeiras }) {
     const novaRota = {
       peso,
       date,
+      idLixeira,
+      livre: 'sim',
     }
-
     if (!peso || !date) {
       toast.warning('Por favor, preencha todos os campos.')
       return
     }
-
-    console.log(novaRota)
     addDoc(collection(firestore, 'rotas'), novaRota).then((docRef) => {
       console.log(docRef.id)
     })
@@ -43,22 +52,24 @@ export function PesoForm({ ilhas, lixeiras }) {
   }
 
   useEffect(() => {
-    if (date != '') {
+    if (date !== '') {
       setDate(new Date())
     }
   }, [])
 
   return (
-    <div className="container mt-2 pt-2">
-      <div className="card mt-2 p-4">
-        <div className="card-header">
-          <h3>Pesagem lixeira</h3>
-        </div>
+    <Container>
+      <Card>
+        <CardHeader>
+          <TitleCard>PESAGEM DA LIXEIRA</TitleCard>
+        </CardHeader>
         <div className="card-body">
           <form>
             <div className="mb-2">
-              <label className="form-label">Peso em Kg da Lixeira</label>
-              <input
+              <LabelForm className="form-label">
+                PESO EM KG DA LIXEIRA
+              </LabelForm>
+              <Input
                 type="text"
                 className="form-control"
                 placeholder="Peso em Kg da Lixeira"
@@ -69,7 +80,9 @@ export function PesoForm({ ilhas, lixeiras }) {
               />
             </div>
             <div className="mb-3 react-datepicker-wrapper">
-              <label className="form-label">Data e Hora da Pesagem</label>
+              <LabelForm className="form-label">
+                DATA E HORA DA PESAGEM&nbsp;
+              </LabelForm>
               <ReactDatePicker
                 className="form-control "
                 selected={date}
@@ -79,13 +92,13 @@ export function PesoForm({ ilhas, lixeiras }) {
                 showTimeInput
               />
             </div>
-
-            <button onClick={salvarRota} className="btn btn-primary">
+            <br />
+            <SaveButton onClick={salvarRota} className="btn btn-primary">
               Cadastrar
-            </button>
+            </SaveButton>
           </form>
         </div>
-      </div>
-    </div>
+      </Card>
+    </Container>
   )
 }
