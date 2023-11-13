@@ -30,9 +30,9 @@ export function PesoForm() {
       peso,
       date,
       idLixeira,
+      livre: 'sim',
     }
 
-    console.log(novaRota)
     addDoc(collection(firestore, 'rotas'), novaRota).then((docRef) => {
       console.log(docRef.id)
     })
