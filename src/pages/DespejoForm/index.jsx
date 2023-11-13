@@ -34,6 +34,7 @@ export function DespejoForm() {
     carregarComposteiras,
     composteiras,
     setComposteiras,
+    rotasSemDespejo,
   } = useContext(IlhaContext)
 
   const cadastrarDespejo = () => {
@@ -50,9 +51,7 @@ export function DespejoForm() {
         despejos = JSON.parse(localStorage.getItem('despejos'))
       }
       novoDespejo = { ...novoDespejo, id: docRef.id }
-      // console.log(novoDespejo)
       despejos.push(novoDespejo)
-      // console.log(despejos)
       localStorage.setItem('despejos', JSON.stringify(despejos))
       limpaEstados()
       navigate('/despejo')
@@ -69,19 +68,13 @@ export function DespejoForm() {
     // para liberar a seleção destas.
     const rt = JSON.parse(localStorage.getItem('rotas'))
     const rtTemp = rt.filter((rota) => rota.livre !== 'nao')
-
-    /*
-    for (let i = 0; i < rt.length; i++) {
-      if (!rt[i.livre]) {
-        rtTemp.push(rt[i])
-        console.log(rt[i])
-      }
-    } */
+    console.log('filtradas as rotas')
     console.log(rtTemp)
-    setRotas(rtTemp)
+    setRotas(rotasSemDespejo)
   }
 
-  const updateRota = (idRota) => {
+  // método para atualizar estado da rota que foi utilizada
+  /* const updateRota = (idRota) => {
     updateDoc(doc(collection(firestore, 'rotas'), idRota), updatedRota).then(
       () => {
         const rotas = JSON.parse(localStorage.getItem('rotas')).filter(
@@ -91,13 +84,14 @@ export function DespejoForm() {
         localStorage.setItem('rotas', JSON.stringify(rotas))
       },
     )
-  }
+  } */
 
   const buscaLixeira = (idLixeira) => {
     return lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0]
   }
 
   useEffect(() => {
+    localStorage.setItem('rotas', [])
     if (
       !localStorage.getItem('lixeiras') ||
       localStorage.getItem('lixeiras').length === 0
@@ -107,22 +101,14 @@ export function DespejoForm() {
     if (localStorage.getItem('lixeiras')) {
       setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
     }
-    if (
-      !localStorage.getItem('rotas') ||
-      JSON.parse(localStorage.getItem('rotas')).length === 0
-    ) {
-      carregarRotas()
-    }
-    if (localStorage.getItem('rotas')) {
-      setRotas(JSON.parse(localStorage.getItem('rotas')))
-      filterRotasLivres()
-    }
+    carregarRotas()
     if (!localStorage.getItem('composteiras')) {
       carregarComposteiras()
     }
     if (localStorage.getItem('composteiras') && composteiras.length === 0) {
       setComposteiras(JSON.parse(localStorage.getItem('composteiras')))
     }
+    setRotas(rotasSemDespejo)
   }, [])
 
   return (

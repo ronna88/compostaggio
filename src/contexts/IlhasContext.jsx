@@ -9,6 +9,7 @@ const IlhaProvider = ({ children }) => {
   const [ilhas, setIlhas] = useState([])
   const [lixeiras, setLixeiras] = useState([])
   const [composteiras, setComposteiras] = useState([])
+  const [rotasSemDespejo, setRotasSemDespejo] = useState([])
 
   const carregarIlhas = () => {
     console.log('carregarIlhas...')
@@ -152,6 +153,14 @@ const IlhaProvider = ({ children }) => {
       console.log('Fora do prazo de cache...')
       fetchRotas()
     }
+
+    setTimeout(() => {
+      setRotasSemDespejo(
+        JSON.parse(localStorage.getItem('rotas')).filter(
+          (rota) => rota.livre !== 'nao',
+        ),
+      )
+    }, 2000)
   }
 
   const ilhaContextData = {
@@ -164,6 +173,7 @@ const IlhaProvider = ({ children }) => {
     carregarRotas,
     composteiras,
     setComposteiras,
+    rotasSemDespejo,
   }
 
   return (
