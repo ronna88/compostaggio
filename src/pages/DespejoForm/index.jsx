@@ -35,6 +35,7 @@ export function DespejoForm() {
     composteiras,
     setComposteiras,
     rotasSemDespejo,
+    setRotasSemDespejo,
   } = useContext(IlhaContext)
 
   const cadastrarDespejo = () => {
@@ -53,6 +54,9 @@ export function DespejoForm() {
       novoDespejo = { ...novoDespejo, id: docRef.id }
       despejos.push(novoDespejo)
       localStorage.setItem('despejos', JSON.stringify(despejos))
+
+      updateRota(novoDespejo.rota)
+
       limpaEstados()
       navigate('/despejo')
     })
@@ -61,20 +65,29 @@ export function DespejoForm() {
   const limpaEstados = () => {
     setRota('')
     setComposteira('')
+    setRotasSemDespejo('')
   }
 
-  const filterRotasLivres = () => {
+  const buscarRota = () => {
     // Função para filtrar as rotas que ainda não foram despejadas na composteira
     // para liberar a seleção destas.
-    const rt = JSON.parse(localStorage.getItem('rotas'))
-    const rtTemp = rt.filter((rota) => rota.livre !== 'nao')
-    console.log('filtradas as rotas')
-    console.log(rtTemp)
+    // const rt = JSON.parse(localStorage.getItem('rotas'))
+    // const rtTemp = rt.filter((rota) => rota.livre !== 'nao')
+    // console.log('filtradas as rotas')
+    // console.log(rtTemp)
     setRotas(rotasSemDespejo)
   }
 
+  const getRota = (idRota) => {
+    return JSON.parse(localStorage.getItem('rotas')).filter(
+      (r) => r.id === idRota,
+    )
+  }
+
   // método para atualizar estado da rota que foi utilizada
-  /* const updateRota = (idRota) => {
+  const updateRota = (idRota) => {
+    const rota = getRota(idRota)
+    const updatedRota = { ...rota, livre: 'nao' }
     updateDoc(doc(collection(firestore, 'rotas'), idRota), updatedRota).then(
       () => {
         const rotas = JSON.parse(localStorage.getItem('rotas')).filter(
@@ -84,14 +97,19 @@ export function DespejoForm() {
         localStorage.setItem('rotas', JSON.stringify(rotas))
       },
     )
-  } */
+  }
 
   const buscaLixeira = (idLixeira) => {
     return lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0]
   }
 
   useEffect(() => {
-    localStorage.setItem('rotas', [])
+    /* if (
+      !localStorage.getItem('rotas') ||
+      JSON.parse(localStorage.getItem('rotas').length === 0)
+    ) {
+      carregarRotas()
+    } */
     if (
       !localStorage.getItem('lixeiras') ||
       localStorage.getItem('lixeiras').length === 0
@@ -101,15 +119,24 @@ export function DespejoForm() {
     if (localStorage.getItem('lixeiras')) {
       setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
     }
-    carregarRotas()
     if (!localStorage.getItem('composteiras')) {
       carregarComposteiras()
     }
     if (localStorage.getItem('composteiras') && composteiras.length === 0) {
       setComposteiras(JSON.parse(localStorage.getItem('composteiras')))
     }
-    setRotas(rotasSemDespejo)
   }, [])
+
+  useEffect(() => {
+    if (rotasSemDespejo.length === 0) {
+      carregarRotas()
+    }
+
+    if (rotasSemDespejo.length === 0) {
+      navigate('/busca')
+    }
+    setRotas(rotasSemDespejo)
+  }, [rotasSemDespejo])
 
   return (
     <Container>

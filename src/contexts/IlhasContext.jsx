@@ -174,6 +174,7 @@ const IlhaProvider = ({ children }) => {
     composteiras,
     setComposteiras,
     rotasSemDespejo,
+    setRotasSemDespejo,
   }
 
   return (
