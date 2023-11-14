@@ -143,7 +143,14 @@ export function Router() {
             </PrivateRoute>
           }
         />
-            
+           <Route
+          path="/despejo"
+          element={
+            <PrivateRoute>
+              <DespejoForm />
+            </PrivateRoute>
+          }
+        /> 
         <Route
           path="/monitoramento"
           element={
