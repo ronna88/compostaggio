@@ -22,7 +22,6 @@ import {
 import { toast } from 'react-toastify'
 import { AuthContext } from '../../contexts/AuthContext'
 
-
 export function DespejoForm() {
   const [lixeiras, setLixeiras] = useState([])
   const [composteira, setComposteira] = useState([])
@@ -133,13 +132,17 @@ export function DespejoForm() {
       }, 1500)
     }
     if (localStorage.getItem('lixeiras')) {
-      setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
+      setTimeout(() => {
+        setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
+      }, 1500)
     }
     if (!localStorage.getItem('composteiras')) {
       carregarComposteiras()
     }
     if (localStorage.getItem('composteiras') && composteiras.length === 0) {
-      setComposteiras(JSON.parse(localStorage.getItem('composteiras')))
+      setTimeout(() => {
+        setComposteiras(JSON.parse(localStorage.getItem('composteiras')))
+      }, 1500)
     }
 
     carregarRotasDisponiveis()
