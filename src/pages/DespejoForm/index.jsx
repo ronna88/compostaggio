@@ -179,7 +179,7 @@ export function DespejoForm() {
                           .toString()
                           .padStart(2, '0')}/${data.getFullYear()} - 
                           ${data.getHours()}:${data.getMinutes()} - 
-                          ${buscaLixeira(r.idLixeira).descricao}`}</option>
+                          ${buscaLixeira(r.idLixeira)?.descricao}`}</option>
                       )
                     })
                   : ''}
