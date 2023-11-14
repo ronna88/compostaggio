@@ -7,9 +7,13 @@ export const ContainerFooter = styled.footer`
   background: ${(props) => props.theme.orange};
   font-weight: bold;
   display: flex;
-  justify-content: end;
+  justify-content: space-between;
 
   p {
     margin: 16px;
   }
+`
+export const ContainerLinks = styled.div`
+  display: flex;
+  gap: 8px;
 `
