@@ -165,18 +165,17 @@ export function DespejoForm() {
                 {rotaLivre
                   ? rotaLivre.map((r) => {
                       const data = new Date(r.date.seconds * 1000)
-                      setTimeout(() => {
-                        return (
-                          <option key={r.id} value={r.id}>{`${data
-                            .getDate()
-                            .toString()
-                            .padStart(2, '0')}/${(data.getMonth() + 1)
-                            .toString()
-                            .padStart(2, '0')}/${data.getFullYear()} - 
+
+                      return (
+                        <option key={r.id} value={r.id}>{`${data
+                          .getDate()
+                          .toString()
+                          .padStart(2, '0')}/${(data.getMonth() + 1)
+                          .toString()
+                          .padStart(2, '0')}/${data.getFullYear()} - 
                             ${data.getHours()}:${data.getMinutes()} - 
                             ${buscaLixeira(r.idLixeira)?.descricao}`}</option>
-                        )
-                      }, 1500)
+                      )
                     })
                   : ''}
               </SelectForm>
