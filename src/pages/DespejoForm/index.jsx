@@ -20,6 +20,7 @@ import {
   TitleCard,
 } from './styles'
 import { toast } from 'react-toastify'
+import { AuthContext } from '../../contexts/AuthContext'
 
 
 export function DespejoForm() {
@@ -37,6 +38,7 @@ export function DespejoForm() {
     composteiras,
     setComposteiras,
   } = useContext(IlhaContext)
+  const { usuario } = useContext(AuthContext)
 
   const carregarRotasDisponiveis = () => {
     const fetchRotas = async () => {
@@ -68,6 +70,7 @@ export function DespejoForm() {
     let novoDespejo = {
       rota,
       composteira,
+      usuario: usuario.email,
       created_date: new Date().toLocaleString('pt-BR'),
       updated_date: new Date().toLocaleString('pt-BR'),
     }
@@ -115,7 +118,7 @@ export function DespejoForm() {
   }
 
   const buscaLixeira = (idLixeira) => {
-    return lixeiras.filter((lixeira) => lixeira.id === idLixeira)
+    return lixeiras.filter((l) => l.id === idLixeira)[0]
   }
 
   useEffect(() => {
@@ -165,8 +168,6 @@ export function DespejoForm() {
                 {rotaLivre
                   ? rotaLivre.map((r) => {
                       const data = new Date(r.date.seconds * 1000)
-                      console.log('r')
-                      console.log(r)
                       return (
                         <option key={r.id} value={r.id}>{`${data
                           .getDate()
