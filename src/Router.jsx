@@ -18,7 +18,6 @@ import { Login } from './pages/Login'
 import Cookies from 'js-cookie'
 import { DespejoForm } from './pages/DespejoForm'
 
-
 export function Router() {
   // const [listaIlhas, setListaIlhas] = useState([]);
   const { carregarIlhas, carregarLixeiras, ilhas, lixeiras } =
@@ -151,7 +150,7 @@ export function Router() {
               <DespejoForm />
             </PrivateRoute>
           }
-        />            
+        />
         <Route
           path="/monitoramento"
           element={
