@@ -8,6 +8,8 @@ const firestore = getFirestore(app)
 const IlhaProvider = ({ children }) => {
   const [ilhas, setIlhas] = useState([])
   const [lixeiras, setLixeiras] = useState([])
+  const [composteiras, setComposteiras] = useState([])
+  const [rotasSemDespejo, setRotasSemDespejo] = useState([])
 
   const carregarIlhas = () => {
     console.log('carregarIlhas...')
@@ -105,6 +107,7 @@ const IlhaProvider = ({ children }) => {
         ),
       )
       localStorage.setItem('expireComposteiras', expireComposteiras)
+      setComposteiras(JSON.stringify(localStorage.getItem('composteiras')))
     }
     if (
       !localStorage.getItem('composteiras') ||
@@ -119,6 +122,47 @@ const IlhaProvider = ({ children }) => {
     }
   }
 
+  const carregarRotas = () => {
+    console.log('carregarRotas...')
+    const agora = new Date()
+    const expireRotas = new Date(agora.getTime() + 60 * 60 * 1000)
+
+    const fetchRotas = async () => {
+      console.log('Iniciando consulta das rotas')
+      const rotasCollection = collection(firestore, 'rotas')
+      const rotasSnapshot = await getDocs(rotasCollection)
+      localStorage.setItem(
+        'rotas',
+        JSON.stringify(
+          rotasSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          })),
+        ),
+      )
+      localStorage.setItem('expireRotas', expireRotas)
+    }
+    if (
+      !localStorage.getItem('rotas') ||
+      !localStorage.getItem('expireRotas') ||
+      JSON.parse(localStorage.getItem('rotas')).length === 0
+    ) {
+      fetchRotas()
+    }
+    if (agora > localStorage.getItem('expireRotas')) {
+      console.log('Fora do prazo de cache...')
+      fetchRotas()
+    }
+
+    setTimeout(() => {
+      setRotasSemDespejo(
+        JSON.parse(localStorage.getItem('rotas')).filter(
+          (rota) => rota.livre !== 'nao',
+        ),
+      )
+    }, 2000)
+  }
+
   const ilhaContextData = {
     carregarIlhas,
     carregarLixeiras,
@@ -126,6 +170,11 @@ const IlhaProvider = ({ children }) => {
     lixeiras,
     setIlhas,
     carregarComposteiras,
+    carregarRotas,
+    composteiras,
+    setComposteiras,
+    rotasSemDespejo,
+    setRotasSemDespejo,
   }
 
   return (

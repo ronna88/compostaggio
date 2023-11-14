@@ -16,6 +16,7 @@ import { ListaComposteira } from './components/ListaComposteiras'
 import { Monitoramento } from './components/Monitoramento'
 import { Login } from './pages/Login'
 import Cookies from 'js-cookie'
+import { DespejoForm } from './pages/DespejoForm'
 
 
 export function Router() {
@@ -143,14 +144,14 @@ export function Router() {
             </PrivateRoute>
           }
         />
-           <Route
+        <Route
           path="/despejo"
           element={
             <PrivateRoute>
               <DespejoForm />
             </PrivateRoute>
           }
-        /> 
+        />            
         <Route
           path="/monitoramento"
           element={
@@ -159,7 +160,6 @@ export function Router() {
             </PrivateRoute>
           }
         />
-
       </Route>
     </Routes>
   )
