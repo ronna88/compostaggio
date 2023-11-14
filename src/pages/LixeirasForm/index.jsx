@@ -38,7 +38,7 @@ export function LixeirasForm() {
   const buscarLixeira = async () => {
     if (localStorage.getItem('lixeiras')) {
       const lixeira = JSON.parse(localStorage.getItem('lixeiras')).find(
-        (l) => l.id === idLixeira
+        (l) => l.id === idLixeira,
       )
       setNome(lixeira.nome)
       setDescricao(lixeira.descricao)
@@ -56,7 +56,7 @@ export function LixeirasForm() {
   const buscarIlha = async (idIlha) => {
     if (localStorage.getItem('ilhas')) {
       const ilha = JSON.parse(localStorage.getItem('ilhas')).find(
-        (i) => i.id === idIlha
+        (i) => i.id === idIlha,
       )
       setIlha({ ...ilha, nome: ilha.nome })
     } else {
@@ -90,6 +90,17 @@ export function LixeirasForm() {
         novaLixeira = { ...novaLixeira, id: docRef.id }
         lixeiras.push(novaLixeira)
         localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
+
+        updateDoc(
+          doc(collection(firestore, 'lixeiras'), novaLixeira.id),
+          novaLixeira,
+        )
+          .then(() => {
+            console.log('inserido id')
+          })
+          .catch((error) => {
+            console.log(error)
+          })
       } else {
         // 'lixeiras' não existe no localStorage, crie um novo array
         const lixeiras = [novaLixeira]
@@ -114,7 +125,7 @@ export function LixeirasForm() {
     updateDoc(doc(collection(firestore, 'lixeiras'), idLixeira), updatedLixeira)
       .then(() => {
         const lixeiras = JSON.parse(localStorage.getItem('lixeiras')).filter(
-          (lixeira) => lixeira.id !== idLixeira
+          (lixeira) => lixeira.id !== idLixeira,
         )
         lixeiras.push(updatedLixeira)
         localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
