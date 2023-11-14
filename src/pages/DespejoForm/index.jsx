@@ -18,6 +18,7 @@ import {
   SelectForm,
   TitleCard,
 } from './styles'
+import { toast } from 'react-toastify'
 
 export function DespejoForm() {
   const [lixeiras, setLixeiras] = useState([])
@@ -104,12 +105,6 @@ export function DespejoForm() {
   }
 
   useEffect(() => {
-    /* if (
-      !localStorage.getItem('rotas') ||
-      JSON.parse(localStorage.getItem('rotas').length === 0)
-    ) {
-      carregarRotas()
-    } */
     if (
       !localStorage.getItem('lixeiras') ||
       localStorage.getItem('lixeiras').length === 0
@@ -130,12 +125,14 @@ export function DespejoForm() {
   useEffect(() => {
     if (rotasSemDespejo.length === 0) {
       carregarRotas()
+      setRotas(rotasSemDespejo)
     }
 
     if (rotasSemDespejo.length === 0) {
-      navigate('/busca')
+      toast.warning(
+        'Não existem pesagens de lixeira disponíveis para despejar na composteira',
+      )
     }
-    setRotas(rotasSemDespejo)
   }, [rotasSemDespejo])
 
   return (
