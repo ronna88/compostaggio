@@ -41,8 +41,10 @@ export function PesoForm() {
       console.log(docRef.id)
     })
 
-    limpaEstados()
-    navigate('/busca')
+    setTimeout(() => {
+      limpaEstados()
+      navigate('/busca')
+    }, 1000)
   }
 
   const limpaEstados = () => {
