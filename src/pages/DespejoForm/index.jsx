@@ -127,22 +127,19 @@ export function DespejoForm() {
     ) {
       carregarLixeiras()
 
-      setTimeout(() => {
-        setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
-      }, 1500)
+      setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
     }
     if (localStorage.getItem('lixeiras')) {
-      setTimeout(() => {
-        setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
-      }, 1500)
+      setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
     }
-    if (!localStorage.getItem('composteiras')) {
+    if (
+      !localStorage.getItem('composteiras') ||
+      localStorage.getItem('composteiras').length === 0
+    ) {
       carregarComposteiras()
     }
     if (localStorage.getItem('composteiras') && composteiras.length === 0) {
-      setTimeout(() => {
-        setComposteiras(JSON.parse(localStorage.getItem('composteiras')))
-      }, 1500)
+      setComposteiras(JSON.parse(localStorage.getItem('composteiras')))
     }
 
     carregarRotasDisponiveis()
@@ -171,6 +168,7 @@ export function DespejoForm() {
                 {rotaLivre
                   ? rotaLivre.map((r) => {
                       const data = new Date(r.date.seconds * 1000)
+
                       return (
                         <option key={r.id} value={r.id}>{`${data
                           .getDate()
@@ -178,8 +176,8 @@ export function DespejoForm() {
                           .padStart(2, '0')}/${(data.getMonth() + 1)
                           .toString()
                           .padStart(2, '0')}/${data.getFullYear()} - 
-                          ${data.getHours()}:${data.getMinutes()} - 
-                          ${buscaLixeira(r.idLixeira).descricao}`}</option>
+                            ${data.getHours()}:${data.getMinutes()} - 
+                            ${buscaLixeira(r.idLixeira)?.descricao}`}</option>
                       )
                     })
                   : ''}
@@ -197,7 +195,6 @@ export function DespejoForm() {
                 </option>
                 {composteiras
                   ? composteiras.map((c) => {
-                      // console.log(c)
                       return (
                         <option key={c.id} value={c.id}>{`${c.nome}`}</option>
                       )
