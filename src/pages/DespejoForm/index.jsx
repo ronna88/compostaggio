@@ -127,22 +127,16 @@ export function DespejoForm() {
     ) {
       carregarLixeiras()
 
-      setTimeout(() => {
-        setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
-      }, 1500)
+      setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
     }
     if (localStorage.getItem('lixeiras')) {
-      setTimeout(() => {
-        setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
-      }, 1500)
+      setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
     }
     if (!localStorage.getItem('composteiras')) {
       carregarComposteiras()
     }
     if (localStorage.getItem('composteiras') && composteiras.length === 0) {
-      setTimeout(() => {
-        setComposteiras(JSON.parse(localStorage.getItem('composteiras')))
-      }, 1500)
+      setComposteiras(JSON.parse(localStorage.getItem('composteiras')))
     }
 
     carregarRotasDisponiveis()
@@ -171,16 +165,18 @@ export function DespejoForm() {
                 {rotaLivre
                   ? rotaLivre.map((r) => {
                       const data = new Date(r.date.seconds * 1000)
-                      return (
-                        <option key={r.id} value={r.id}>{`${data
-                          .getDate()
-                          .toString()
-                          .padStart(2, '0')}/${(data.getMonth() + 1)
-                          .toString()
-                          .padStart(2, '0')}/${data.getFullYear()} - 
-                          ${data.getHours()}:${data.getMinutes()} - 
-                          ${buscaLixeira(r.idLixeira)?.descricao}`}</option>
-                      )
+                      setTimeout(() => {
+                        return (
+                          <option key={r.id} value={r.id}>{`${data
+                            .getDate()
+                            .toString()
+                            .padStart(2, '0')}/${(data.getMonth() + 1)
+                            .toString()
+                            .padStart(2, '0')}/${data.getFullYear()} - 
+                            ${data.getHours()}:${data.getMinutes()} - 
+                            ${buscaLixeira(r.idLixeira)?.descricao}`}</option>
+                        )
+                      }, 1500)
                     })
                   : ''}
               </SelectForm>
