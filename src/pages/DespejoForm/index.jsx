@@ -132,7 +132,10 @@ export function DespejoForm() {
     if (localStorage.getItem('lixeiras')) {
       setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
     }
-    if (!localStorage.getItem('composteiras')) {
+    if (
+      !localStorage.getItem('composteiras') ||
+      localStorage.getItem('composteiras').length === 0
+    ) {
       carregarComposteiras()
     }
     if (localStorage.getItem('composteiras') && composteiras.length === 0) {
@@ -192,7 +195,6 @@ export function DespejoForm() {
                 </option>
                 {composteiras
                   ? composteiras.map((c) => {
-                      // console.log(c)
                       return (
                         <option key={c.id} value={c.id}>{`${c.nome}`}</option>
                       )
