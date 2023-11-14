@@ -21,14 +21,6 @@ export function Header() {
   return (
     <ContainerHeader>
       <ContentHeader>
-        <ButtonMenu to="cadastro-lixeira">
-          <Recycle />
-          <span>CADASTRO DE LIXEIRA</span>
-        </ButtonMenu>
-        <ButtonMenu to="/lixeira">
-          <Trash />
-          <span>LISTAGEM DE LIXEIRA</span>
-        </ButtonMenu>
         <ButtonMenu to="/cadastro-ilha">
           <PlusSquare />
           <span>CADASTRO DE ILHA</span>
@@ -36,6 +28,14 @@ export function Header() {
         <ButtonMenu to="/ilha">
           <ListDashes />
           <span>LISTAGEM DE ILHA</span>
+        </ButtonMenu>
+        <ButtonMenu to="cadastro-lixeira">
+          <Recycle />
+          <span>CADASTRO DE LIXEIRA</span>
+        </ButtonMenu>
+        <ButtonMenu to="/lixeira">
+          <Trash />
+          <span>LISTAGEM DE LIXEIRA</span>
         </ButtonMenu>
         <img src={IMGLogo} alt="Logo Reciclagem" width={150} />
 
