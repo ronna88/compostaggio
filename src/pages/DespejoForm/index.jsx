@@ -6,6 +6,7 @@ import {
   getFirestore,
   updateDoc,
   doc,
+  getDocs,
 } from 'firebase/firestore'
 import { useNavigate, useParams } from 'react-router-dom'
 import { IlhaContext } from '../../contexts/IlhasContext'
@@ -20,24 +21,47 @@ import {
 } from './styles'
 import { toast } from 'react-toastify'
 
+
 export function DespejoForm() {
   const [lixeiras, setLixeiras] = useState([])
   const [composteira, setComposteira] = useState([])
   const [edit, setEdit] = useState(false)
-  const [rotas, setRotas] = useState([])
   const [rota, setRota] = useState({ id: '' })
+  const [rotaLivre, setRotaLivre] = useState([])
   const navigate = useNavigate()
   const firestore = getFirestore(app)
   const { idDespejo } = useParams()
   const {
     carregarLixeiras,
-    carregarRotas,
     carregarComposteiras,
     composteiras,
     setComposteiras,
-    rotasSemDespejo,
-    setRotasSemDespejo,
   } = useContext(IlhaContext)
+
+  const carregarRotasDisponiveis = () => {
+    const fetchRotas = async () => {
+      console.log('Iniciando consulta das rotas')
+      const rotasCollection = collection(firestore, 'rotas')
+      const rotasSnapshot = await getDocs(rotasCollection)
+
+      setRotaLivre(
+        rotasSnapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .filter((r) => r.livre !== 'nao'),
+      )
+
+      if (rotaLivre.length === 0) {
+        toast.warning(
+          'Sem Pesagens disponíveis para despejar nas composteiras!',
+        )
+      }
+    }
+
+    fetchRotas()
+  }
 
   const cadastrarDespejo = () => {
     event.preventDefault()
@@ -66,17 +90,7 @@ export function DespejoForm() {
   const limpaEstados = () => {
     setRota('')
     setComposteira('')
-    setRotasSemDespejo('')
-  }
-
-  const buscarRota = () => {
-    // Função para filtrar as rotas que ainda não foram despejadas na composteira
-    // para liberar a seleção destas.
-    // const rt = JSON.parse(localStorage.getItem('rotas'))
-    // const rtTemp = rt.filter((rota) => rota.livre !== 'nao')
-    // console.log('filtradas as rotas')
-    // console.log(rtTemp)
-    setRotas(rotasSemDespejo)
+    setRotaLivre('')
   }
 
   const getRota = (idRota) => {
@@ -101,7 +115,7 @@ export function DespejoForm() {
   }
 
   const buscaLixeira = (idLixeira) => {
-    return lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0]
+    return lixeiras.filter((lixeira) => lixeira.id === idLixeira)
   }
 
   useEffect(() => {
@@ -110,6 +124,10 @@ export function DespejoForm() {
       localStorage.getItem('lixeiras').length === 0
     ) {
       carregarLixeiras()
+
+      setTimeout(() => {
+        setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
+      }, 1500)
     }
     if (localStorage.getItem('lixeiras')) {
       setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
@@ -120,20 +138,9 @@ export function DespejoForm() {
     if (localStorage.getItem('composteiras') && composteiras.length === 0) {
       setComposteiras(JSON.parse(localStorage.getItem('composteiras')))
     }
+
+    carregarRotasDisponiveis()
   }, [])
-
-  useEffect(() => {
-    if (rotasSemDespejo.length === 0) {
-      carregarRotas()
-      setRotas(rotasSemDespejo)
-    }
-
-    if (rotasSemDespejo.length === 0) {
-      toast.warning(
-        'Não existem pesagens de lixeira disponíveis para despejar na composteira',
-      )
-    }
-  }, [rotasSemDespejo])
 
   return (
     <Container>
@@ -155,10 +162,11 @@ export function DespejoForm() {
                 value={rota.id}
               >
                 <option>Selecione a pesagem realizada...</option>
-                {rotas
-                  ? rotas.map((r) => {
+                {rotaLivre
+                  ? rotaLivre.map((r) => {
                       const data = new Date(r.date.seconds * 1000)
-
+                      console.log('r')
+                      console.log(r)
                       return (
                         <option key={r.id} value={r.id}>{`${data
                           .getDate()
