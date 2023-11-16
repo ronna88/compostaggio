@@ -13,9 +13,9 @@ import {
 
 export function BuscaForm() {
   const [idLixeira, setIdLixeira] = useState()
-  const [lixeiras, setLixeiras] = useState()
+  // const [lixeiras, setLixeiras] = useState()
   const navigate = useNavigate()
-  const { carregarLixeiras } = useContext(IlhaContext)
+  const { carregarLixeiras, lixeiras } = useContext(IlhaContext)
 
   const buscarLixeira = () => {
     event.preventDefault()
@@ -25,15 +25,20 @@ export function BuscaForm() {
       JSON.parse(localStorage.getItem('lixeiras')).length === 0
     ) {
       carregarLixeiras()
-      setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
+      // setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
     } else {
-      setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
+      // localStorage lixeiras ja existe.
     }
+    console.log(JSON.parse(localStorage.getItem('lixeiras')))
+    // setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
 
-    console.log(lixeiras)
-    const lixeira = lixeiras.filter((l) => l.id === idLixeira)
-    console.log('lixeira filtrada ')
-    navigate('/peso/' + lixeira[0].id)
+    setTimeout(() => {
+      console.log('dentro')
+      console.log(lixeiras)
+      const lixeira = lixeiras.filter((l) => l.id === idLixeira)
+      console.log('lixeira filtrada ')
+      navigate('/peso/' + lixeira[0].id)
+    }, 3000)
   }
 
   return (
