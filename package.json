@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@esbuild/darwin-x64": "^0.19.5",
     "@phosphor-icons/react": "^2.0.13",
     "axios": "^1.5.0",
     "file-saver": "^2.0.5",
