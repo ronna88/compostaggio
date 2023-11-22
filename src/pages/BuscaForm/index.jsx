@@ -19,24 +19,18 @@ export function BuscaForm() {
 
   const buscarLixeira = () => {
     event.preventDefault()
-    console.log('buscar')
-    if (
-      !localStorage.getItem('lixeiras') ||
-      JSON.parse(localStorage.getItem('lixeiras')).length === 0
-    ) {
-      carregarLixeiras()
-      // setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
-    } else {
-      // localStorage lixeiras ja existe.
-    }
-    console.log(JSON.parse(localStorage.getItem('lixeiras')))
-    // setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
-
+    carregarLixeiras()
+    let lixeira = {}
     setTimeout(() => {
+      if (JSON.parse(localStorage.getItem('lixeiras')).length !== 0) {
+        lixeira = JSON.parse(localStorage.getItem('lixeiras')).filter(
+          (l) => l.id === idLixeira,
+        )
+      }
       console.log('dentro')
       console.log(lixeiras)
-      const lixeira = lixeiras.filter((l) => l.id === idLixeira)
       console.log('lixeira filtrada ')
+      console.log(lixeira)
       navigate('/peso/' + lixeira[0].id)
     }, 3000)
   }
