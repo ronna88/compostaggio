@@ -18,6 +18,7 @@ import {
   SaveButton,
   SelectForm,
   TitleCard,
+  Input,
 } from './styles'
 import { toast } from 'react-toastify'
 import { AuthContext } from '../../contexts/AuthContext'
@@ -45,7 +46,7 @@ export function DespejoForm() {
       const rotasCollection = collection(firestore, 'rotas')
       const rotasSnapshot = await getDocs(rotasCollection)
 
-      setRotaLivre(
+      await setRotaLivre(
         rotasSnapshot.docs
           .map((doc) => ({
             id: doc.id,
@@ -54,14 +55,24 @@ export function DespejoForm() {
           .filter((r) => r.livre !== 'nao'),
       )
 
-      if (rotaLivre.length === 0) {
-        toast.warning(
-          'Sem Pesagens disponíveis para despejar nas composteiras!',
-        )
-      }
+      localStorage.setItem(
+        'rotas',
+        JSON.stringify(
+          rotasSnapshot.docs
+            .map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }))
+            .filter((r) => r.livre !== 'nao'),
+        ),
+      )
     }
 
     fetchRotas()
+
+    if (rotaLivre.length === 0) {
+      toast.warning('Sem Pesagens disponíveis para despejar nas composteiras!')
+    }
   }
 
   const cadastrarDespejo = () => {
@@ -85,7 +96,7 @@ export function DespejoForm() {
       updateRota(novoDespejo.rota)
 
       limpaEstados()
-      navigate('/despejo')
+      navigate('/ilha')
     })
   }
 
@@ -201,6 +212,15 @@ export function DespejoForm() {
                     })
                   : ''}
               </SelectForm>
+            </div>
+            <div className="mb-3">
+              <LabelForm className="form-label">USUARIO:</LabelForm>
+              <Input
+                type="text"
+                className="form-control"
+                disabled
+                value={usuario ? usuario.email : ''}
+              />
             </div>
             {!edit ? (
               <SaveButton

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { app } from '../../services/firebase'
 import { addDoc, collection, getFirestore } from 'firebase/firestore'
 import ReactDatePicker from 'react-datepicker'
@@ -15,6 +15,7 @@ import {
   TitleCard,
 } from './styles'
 import { toast } from 'react-toastify'
+import { AuthContext } from '../../contexts/AuthContext'
 
 export function PesoForm() {
   const [rota, setRota] = useState('')
@@ -23,6 +24,8 @@ export function PesoForm() {
   const navigate = useNavigate()
   const { idLixeira } = useParams()
   const firestore = getFirestore(app)
+
+  const { usuario } = useContext(AuthContext)
 
   const salvarRota = () => {
     event.preventDefault()
@@ -92,6 +95,15 @@ export function PesoForm() {
                 timeInputLabel="Time:"
                 dateFormat="MM/dd/yyyy h:mm aa"
                 showTimeInput
+              />
+            </div>
+            <div className="mb-3">
+              <LabelForm className="form-label">USUARIO:</LabelForm>
+              <Input
+                type="text"
+                className="form-control"
+                disabled
+                value={usuario ? usuario.email : ''}
               />
             </div>
             <br />
