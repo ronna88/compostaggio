@@ -172,7 +172,7 @@ export function LixeirasForm() {
         <div className="card-body">
           <form>
             <div className="mb-2">
-              <LabelForm>NOME:</LabelForm>
+              <LabelForm>CÓDIGO:</LabelForm>
               <Input
                 type="text"
                 className="form-control"
@@ -184,7 +184,7 @@ export function LixeirasForm() {
               />
             </div>
             <div className="mb-2">
-              <LabelForm>DESCRIÇÃO:</LabelForm>
+              <LabelForm>LOCALIZAÇÃO:</LabelForm>
               <Input
                 type="text"
                 className="form-control"
