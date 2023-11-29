@@ -60,7 +60,7 @@ export function IlhasForm() {
       created_date: new Date().toLocaleString('pt-BR'),
     }
 
-    if (!nome || !descricao || usuario) {
+    if (!nome || !descricao) {
       toast.warning('Por favor, preencha todos os campos.')
       return
     }
@@ -87,7 +87,7 @@ export function IlhasForm() {
       updated_date: new Date().toLocaleString('pt-BR'),
     }
 
-    if (!idIlha || !nome || !descricao || usuario) {
+    if (!idIlha || !nome || !descricao) {
       toast.warning('Por favor, preencha todos os campos.')
       return
     }
@@ -125,7 +125,7 @@ export function IlhasForm() {
         <div className="card-body">
           <form>
             <div className="mb-2">
-              <LabelForm className="form-label">NOME:</LabelForm>
+              <LabelForm className="form-label">CÓDIGO:</LabelForm>
               <Input
                 type="text"
                 className="form-control"
@@ -137,7 +137,7 @@ export function IlhasForm() {
               />
             </div>
             <div className="mb-3">
-              <LabelForm className="form-label">DESCRIÇÃO:</LabelForm>
+              <LabelForm className="form-label">LOCALIZAÇÃO:</LabelForm>
               <Input
                 type="text"
                 className="form-control"
