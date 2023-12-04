@@ -40,9 +40,15 @@ export function PesoForm() {
       toast.warning('Por favor, preencha todos os campos.')
       return
     }
-    addDoc(collection(firestore, 'rotas'), novaRota).then((docRef) => {
-      console.log(docRef.id)
-    })
+    addDoc(collection(firestore, 'rotas'), novaRota)
+      .then((docRef) => {
+        toast.success('Peso cadastrado com sucesso.')
+        console.log(docRef.id)
+      })
+      .catch((error) => {
+        toast.error('Erro ao cadastrar peso da lixeira.')
+        console.log(error)
+      })
 
     setTimeout(() => {
       limpaEstados()

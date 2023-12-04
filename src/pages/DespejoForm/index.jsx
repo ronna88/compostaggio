@@ -84,20 +84,25 @@ export function DespejoForm() {
       created_date: new Date().toLocaleString('pt-BR'),
       updated_date: new Date().toLocaleString('pt-BR'),
     }
-    addDoc(collection(firestore, 'despejos'), novoDespejo).then((docRef) => {
-      let despejos = []
-      if (localStorage.getItem('despejos')) {
-        despejos = JSON.parse(localStorage.getItem('despejos'))
-      }
-      novoDespejo = { ...novoDespejo, id: docRef.id }
-      despejos.push(novoDespejo)
-      localStorage.setItem('despejos', JSON.stringify(despejos))
+    addDoc(collection(firestore, 'despejos'), novoDespejo)
+      .then((docRef) => {
+        let despejos = []
+        if (localStorage.getItem('despejos')) {
+          despejos = JSON.parse(localStorage.getItem('despejos'))
+        }
+        novoDespejo = { ...novoDespejo, id: docRef.id }
+        despejos.push(novoDespejo)
+        localStorage.setItem('despejos', JSON.stringify(despejos))
 
-      updateRota(novoDespejo.rota)
-
-      limpaEstados()
-      navigate('/ilha')
-    })
+        updateRota(novoDespejo.rota)
+        toast.success('Despejo de resíduo cadastrado com sucesso.')
+        limpaEstados()
+        navigate('/ilha')
+      })
+      .catch((error) => {
+        toast.error('Erro ao cadastrar despejo de resíduo.')
+        console.log(error)
+      })
   }
 
   const limpaEstados = () => {

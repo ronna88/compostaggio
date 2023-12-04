@@ -45,8 +45,8 @@ export function AduboForm() {
       created_date: new Date().toLocaleString('pt-BR'),
       updated_date: new Date().toLocaleString('pt-BR'),
     }
-    addDoc(collection(firestore, 'retiradas_adubo'), novaRetirada).then(
-      (docRef) => {
+    addDoc(collection(firestore, 'retiradas_adubo'), novaRetirada)
+      .then((docRef) => {
         const retiradas = []
         if (localStorage.getItem('retiradas_adubo')) {
           const retiradas = JSON.parse(localStorage.getItem('retiradas_adubo'))
@@ -55,9 +55,13 @@ export function AduboForm() {
         retiradas.push(novaRetirada)
         localStorage.setItem('retiradas_adubo', JSON.stringify(retiradas))
         limpaEstados()
+        toast.success('Retirada cadastrada com sucesso!')
         navigate('/ilha')
-      }
-    )
+      })
+      .catch(() => {
+        toast.error('Erro ao cadastrar retirada.')
+        navigate('/ilha')
+      })
   }
 
   const editarRetiradaAdubo = () => {
@@ -76,18 +80,20 @@ export function AduboForm() {
 
     updateDoc(
       doc(collection(firestore, 'retiradas_adubo'), idAdubo),
-      updatedAdubo
+      updatedAdubo,
     )
       .then(() => {
         const listaAdubos = JSON.parse(
-          localStorage.getItem('retiradas_adubo')
+          localStorage.getItem('retiradas_adubo'),
         ).filter((adubo) => adubo.id !== idAdubo)
         listaAdubos.push(updatedAdubo)
         localStorage.setItem('retiradas_adubo', JSON.stringify(listaAdubos))
         limpaEstados()
+        toast.success('Retirada atualizada com sucesso!')
         navigate('/retiradas')
       })
       .catch((error) => {
+        toast.error('Erro ao atualizar retirada.')
         console.log(error)
       })
   }
