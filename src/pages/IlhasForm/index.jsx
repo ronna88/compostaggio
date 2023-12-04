@@ -65,15 +65,22 @@ export function IlhasForm() {
       return
     }
 
-    addDoc(collection(firestore, 'ilhas'), novaIlha).then((docRef) => {
-      console.log('Ilha Adicionada com Sucesso')
-      const ilhas = JSON.parse(localStorage.getItem('ilhas'))
-      novaIlha = { ...novaIlha, id: docRef.id }
-      ilhas.push(novaIlha)
-      localStorage.setItem('ilhas', JSON.stringify(ilhas))
-      limpaEstados()
-      navigate('/ilha')
-    })
+    addDoc(collection(firestore, 'ilhas'), novaIlha)
+      .then((docRef) => {
+        console.log('Ilha Adicionada com Sucesso')
+        const ilhas = JSON.parse(localStorage.getItem('ilhas'))
+        novaIlha = { ...novaIlha, id: docRef.id }
+        ilhas.push(novaIlha)
+        localStorage.setItem('ilhas', JSON.stringify(ilhas))
+        limpaEstados()
+
+        toast.success('Ilha cadastrada com sucesso.')
+        navigate('/ilha')
+      })
+      .catch(() => {
+        toast.error('Erro ao cadastrar ilha.')
+        navigate('/ilha')
+      })
   }
 
   const editarIlha = () => {
@@ -100,9 +107,12 @@ export function IlhasForm() {
         ilhas[indexIlha] = updatedIlha
         localStorage.setItem('ilhas', JSON.stringify(ilhas))
         limpaEstados()
+        toast.success('Ilha atualizada com sucesso.')
+        navigate('/ilha')
       })
       .catch((error) => {
         console.log(error)
+        toast.error('Erro ao atualizar ilha.')
       })
   }
 

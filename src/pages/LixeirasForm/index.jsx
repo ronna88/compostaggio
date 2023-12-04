@@ -83,32 +83,38 @@ export function LixeirasForm() {
       created_date: new Date().toLocaleString('pt-BR'),
       updated_date: new Date().toLocaleString('pt-BR'),
     }
-    addDoc(collection(firestore, 'lixeiras'), novaLixeira).then((docRef) => {
-      if (localStorage.getItem('lixeiras')) {
-        // 'lixeiras' já existe, você pode fazer o JSON.parse
-        const lixeiras = JSON.parse(localStorage.getItem('lixeiras'))
-        novaLixeira = { ...novaLixeira, id: docRef.id }
-        lixeiras.push(novaLixeira)
-        localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
+    addDoc(collection(firestore, 'lixeiras'), novaLixeira)
+      .then((docRef) => {
+        if (localStorage.getItem('lixeiras')) {
+          // 'lixeiras' já existe, você pode fazer o JSON.parse
+          const lixeiras = JSON.parse(localStorage.getItem('lixeiras'))
+          novaLixeira = { ...novaLixeira, id: docRef.id }
+          lixeiras.push(novaLixeira)
+          localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
 
-        updateDoc(
-          doc(collection(firestore, 'lixeiras'), novaLixeira.id),
-          novaLixeira,
-        )
-          .then(() => {
-            console.log('inserido id')
-          })
-          .catch((error) => {
-            console.log(error)
-          })
-      } else {
-        // 'lixeiras' não existe no localStorage, crie um novo array
-        const lixeiras = [novaLixeira]
-        localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
-      }
-      limpaEstados()
-      navigate('/lixeira')
-    })
+          updateDoc(
+            doc(collection(firestore, 'lixeiras'), novaLixeira.id),
+            novaLixeira,
+          )
+            .then(() => {
+              console.log('inserido id')
+            })
+            .catch((error) => {
+              console.log(error)
+            })
+        } else {
+          // 'lixeiras' não existe no localStorage, crie um novo array
+          const lixeiras = [novaLixeira]
+          localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
+        }
+        limpaEstados()
+        toast.success('Lixeira cadastrada com sucesso.')
+        navigate('/lixeira')
+      })
+      .catch((error) => {
+        toast.error('Erro ao atualizar lixeira.')
+        console.log(error)
+      })
   }
 
   const editarLixeira = () => {
@@ -130,9 +136,11 @@ export function LixeirasForm() {
         lixeiras.push(updatedLixeira)
         localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
         limpaEstados()
+        toast.success('Lixeira atualizada com sucesso.')
         navigate('/lixeira')
       })
       .catch((error) => {
+        toast.error('Erro ao atualizar lixeira.')
         console.log(error)
       })
   }

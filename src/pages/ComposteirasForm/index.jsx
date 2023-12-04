@@ -33,7 +33,7 @@ export function ComposteiraForm() {
   const buscarComposteira = async () => {
     if (localStorage.getItem('composteiras')) {
       const composteira = JSON.parse(localStorage.getItem('composteiras')).find(
-        (l) => l.id === idComposteira
+        (l) => l.id === idComposteira,
       )
       setNome(composteira.nome)
     } else {
@@ -65,8 +65,8 @@ export function ComposteiraForm() {
       created_date: new Date().toLocaleString('pt-BR'),
     }
 
-    addDoc(collection(firestore, 'composteiras'), novaComposteira).then(
-      (docRef) => {
+    addDoc(collection(firestore, 'composteiras'), novaComposteira)
+      .then((docRef) => {
         const composteiras = JSON.parse(localStorage.getItem('composteiras'))
         novaComposteira = { ...novaComposteira, id: docRef.id }
 
@@ -74,9 +74,13 @@ export function ComposteiraForm() {
         console.log(composteiras)
         localStorage.setItem('composteiras', JSON.stringify(composteiras))
         limpaEstados()
+        toast.success('Composteira cadastrada com sucesso.')
         navigate('/composteira')
-      }
-    )
+      })
+      .catch(() => {
+        toast.error('Erro ao cadastrar composteira.')
+        navigate('/composteira')
+      })
     limpaEstados()
   }
 
@@ -97,20 +101,22 @@ export function ComposteiraForm() {
 
     updateDoc(
       doc(collection(firestore, 'composteiras'), idComposteira),
-      updatedComposteira
+      updatedComposteira,
     )
       .then(() => {
         console.log('Composteira atualizada')
         const composteiras = JSON.parse(
-          localStorage.getItem('composteiras')
+          localStorage.getItem('composteiras'),
         ).filter((composteira) => composteira.id !== idComposteira)
         console.log(composteiras)
         composteiras.push(updatedComposteira)
         localStorage.setItem('composteiras', JSON.stringify(composteiras))
         limpaEstados()
+        toast.success('Composteira atualizada com sucesso.')
         navigate('/composteira')
       })
       .catch((error) => {
+        toast.error('Erro ao cadastrar composteira.')
         console.log(error)
       })
   }
