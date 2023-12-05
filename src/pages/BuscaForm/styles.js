@@ -14,9 +14,9 @@ export const Card = styled.div`
 `
 export const CardHeader = styled.div`
   display: flex;
-  gap: 4rem;
   align-items: center;
   height: 6rem;
+  flex-direction: column;
 `
 export const TitleCard = styled.div`
   color: #00644e;
@@ -24,9 +24,23 @@ export const TitleCard = styled.div`
   font-size: 2.5rem;
   padding-left: 1rem;
 `
+export const SubTitleCard = styled.div`
+  padding-left: 1rem;
+`
+export const FormContent = styled.form`
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+`
+export const InputContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+`
 export const Input = styled.input`
+  display: flex;
   background-color: #f6f6f6;
   height: 2rem;
+  width: 150px;
 `
 export const LabelForm = styled.label`
   font-weight: 900;
