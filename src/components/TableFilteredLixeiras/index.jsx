@@ -17,8 +17,15 @@ export function TableFilteredLixeiras({
   }
 
   const filterLixeiraByNome = (nomeLixeira) => {
-    console.log(lixeiras.filter((lix) => lix.descricao.includes(nomeLixeira)))
-    return lixeiras.filter((lix) => lix.descricao.includes(nomeLixeira))
+    console.log('COMPARACAO nomeLixeira: ' + nomeLixeira)
+    console.log(
+      lixeiras.filter((lix) =>
+        lix.descricao.toLowerCase().includes(nomeLixeira.toLowerCase()),
+      ),
+    )
+    return lixeiras.filter((lix) =>
+      lix.descricao.toLowerCase().includes(nomeLixeira.toLowerCase()),
+    )
   }
 
   useEffect(() => {
@@ -68,7 +75,8 @@ export function TableFilteredLixeiras({
           verifica(nomeLixeira, idLixeira)?.map((l) => {
             return (
               <option key={l?.id} value={l?.id}>
-                COD: {l?.descricao} - TIPO: {l?.nome} - Ilha: {filterNomeIlha(l?.ilha)}
+                COD: {l?.descricao} - TIPO: {l?.nome} - Ilha:{' '}
+                {filterNomeIlha(l?.ilha)}
               </option>
             )
           })

@@ -17,7 +17,7 @@ import { PencilSimple, Trash } from '@phosphor-icons/react'
 
 export function ListaIlhas() {
   const firestore = getFirestore(app)
-  const { carregarIlhas } = useContext(IlhaContext)
+  const { carregarIlhas, carregarLixeiras } = useContext(IlhaContext)
   const [ilhas, setIlhas] = useState([])
   const navigate = useNavigate()
 
@@ -28,6 +28,9 @@ export function ListaIlhas() {
       if (ilhas.length === 0) {
         setIlhas(JSON.parse(localStorage.getItem('ilhas')))
       }
+    }
+    if (!localStorage.getItem('lixeiras')) {
+      carregarLixeiras()
     }
   }, [ilhas])
 
