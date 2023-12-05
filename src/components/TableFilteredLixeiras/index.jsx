@@ -17,7 +17,8 @@ export function TableFilteredLixeiras({
   }
 
   const filterLixeiraByNome = (nomeLixeira) => {
-    return lixeiras.filter((lix) => lix.nome.includes(nomeLixeira))
+    console.log(lixeiras.filter((lix) => lix.descricao.includes(nomeLixeira)))
+    return lixeiras.filter((lix) => lix.descricao.includes(nomeLixeira))
   }
 
   useEffect(() => {
@@ -67,7 +68,7 @@ export function TableFilteredLixeiras({
           verifica(nomeLixeira, idLixeira)?.map((l) => {
             return (
               <option key={l?.id} value={l?.id}>
-                {l?.nome} - Ilha: {filterNomeIlha(l?.ilha)}
+                COD: {l?.descricao} - TIPO: {l?.nome} - Ilha: {filterNomeIlha(l?.ilha)}
               </option>
             )
           })
