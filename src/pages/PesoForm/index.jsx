@@ -1,6 +1,13 @@
 import { useContext, useEffect, useState } from 'react'
 import { app } from '../../services/firebase'
-import { addDoc, collection, getFirestore } from 'firebase/firestore'
+import {
+  addDoc,
+  collection,
+  getFirestore,
+  doc,
+  getDoc,
+  updateDoc,
+} from 'firebase/firestore'
 import ReactDatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 
@@ -18,11 +25,13 @@ import { toast } from 'react-toastify'
 import { AuthContext } from '../../contexts/AuthContext'
 
 export function PesoForm() {
+  const [edit, setEdit] = useState(false)
   const [rota, setRota] = useState('')
   const [peso, setPeso] = useState('')
   const [date, setDate] = useState(new Date())
+  const [lix, setLix] = useState('')
   const navigate = useNavigate()
-  const { idLixeira } = useParams()
+  const { idLixeira, idRota } = useParams()
   const firestore = getFirestore(app)
 
   const { usuario } = useContext(AuthContext)
@@ -66,7 +75,69 @@ export function PesoForm() {
     if (date !== '') {
       setDate(new Date())
     }
+
+    if (window.location.pathname.includes('rota')) {
+      setEdit(true)
+      buscarRota(idRota)
+      console.log('oi')
+    }
   }, [])
+
+  const buscarRota = async () => {
+    if (localStorage.getItem('rotas')) {
+      const rota = JSON.parse(localStorage.getItem('rotas')).find(
+        (r) => r.id === idRota,
+      )
+      setPeso(rota.peso)
+      setLix(rota.idLixeira)
+      console.log(rota)
+      console.log(rota.date?.seconds * 1000)
+      if (isNaN(rota.date?.seconds * 1000)) {
+        // testar
+        setDate(new Date(rota.date))
+      } else {
+        setDate(new Date(rota.date?.seconds * 1000))
+      }
+    } else {
+      const docRef = doc(firestore, 'rotas', idRota)
+      const docSnap = await getDoc(docRef)
+      setPeso(docSnap.data().nome)
+      setLix(docSnap.data().idLixeira)
+      // setDate(docSnap.data().date)
+    }
+    console.log(peso)
+  }
+
+  const editarRota = () => {
+    event.preventDefault()
+    const updatedRota = {
+      id: idRota,
+      peso,
+      date: new Date(date),
+      idLixeira: lix,
+      usuario: usuario.email,
+      updated_date: new Date().toLocaleString('pt-BR'),
+    }
+
+    updateDoc(doc(collection(firestore, 'rotas'), idRota), updatedRota)
+      .then(() => {
+        const rotas = JSON.parse(localStorage.getItem('rotas')).filter(
+          (rota) => rota.id !== idRota,
+        )
+        rotas.push(updatedRota)
+        localStorage.removeItem('rotas')
+        setTimeout(() => {
+          localStorage.setItem('rotas', JSON.stringify(rotas))
+          toast.success('Rota atualizada com sucesso.')
+          limpaEstados()
+        }, 2500)
+        navigate('/rota')
+      })
+      .catch((error) => {
+        toast.error('Erro ao atualizar rota.')
+        console.log(error)
+      })
+  }
 
   return (
     <Container>
@@ -99,7 +170,7 @@ export function PesoForm() {
                 selected={date}
                 onChange={(date) => setDate(date)}
                 timeInputLabel="Time:"
-                dateFormat="MM/dd/yyyy h:mm aa"
+                dateFormat="dd/MM/yyyy h:mm aa"
                 showTimeInput
               />
             </div>
@@ -113,9 +184,15 @@ export function PesoForm() {
               />
             </div>
             <br />
-            <SaveButton onClick={salvarRota} className="btn btn-primary">
-              Cadastrar
-            </SaveButton>
+            {edit ? (
+              <SaveButton onClick={editarRota} className="btn btn-primary">
+                Atualizar
+              </SaveButton>
+            ) : (
+              <SaveButton onClick={salvarRota} className="btn btn-primary">
+                Cadastrar
+              </SaveButton>
+            )}
           </form>
         </div>
       </Card>
