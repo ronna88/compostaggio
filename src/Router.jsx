@@ -17,6 +17,7 @@ import { Monitoramento } from './components/Monitoramento'
 import { Login } from './pages/Login'
 import Cookies from 'js-cookie'
 import { DespejoForm } from './pages/DespejoForm'
+import { ListaPesagens } from './components/ListaPesagens'
 
 export function Router() {
   // const [listaIlhas, setListaIlhas] = useState([]);
@@ -132,6 +133,22 @@ export function Router() {
           element={
             <PrivateRoute>
               <AduboForm lixeiras={lixeiras} />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/rota"
+          element={
+            <PrivateRoute>
+              <ListaPesagens />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/rota/:idRota"
+          element={
+            <PrivateRoute>
+              <PesoForm />
             </PrivateRoute>
           }
         />
