@@ -1,6 +1,13 @@
 import { createContext, useState } from 'react'
 import { app } from '../services/firebase'
-import { addDoc, collection, getFirestore, getDocs } from 'firebase/firestore'
+import {
+  addDoc,
+  collection,
+  getFirestore,
+  getDocs,
+  orderBy,
+  query,
+} from 'firebase/firestore'
 
 const IlhaContext = createContext({})
 const firestore = getFirestore(app)
@@ -132,7 +139,9 @@ const IlhaProvider = ({ children }) => {
     const fetchRotas = async () => {
       console.log('Iniciando consulta das rotas')
       const rotasCollection = collection(firestore, 'rotas')
-      const rotasSnapshot = await getDocs(rotasCollection)
+      const rotasSnapshot = await getDocs(
+        query(rotasCollection, orderBy('date', 'asc')),
+      )
       localStorage.setItem(
         'rotas',
         JSON.stringify(
