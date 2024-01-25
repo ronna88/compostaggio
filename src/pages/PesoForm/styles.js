@@ -14,14 +14,17 @@ export const Card = styled.div`
 `
 export const CardHeader = styled.div`
   display: flex;
-  gap: 4rem;
   align-items: center;
   height: 6rem;
+  flex-direction: column;
 `
 export const TitleCard = styled.div`
   color: #00644e;
   font-weight: 900;
   font-size: 2.5rem;
+  padding-left: 1rem;
+`
+export const SubTitleCard = styled.div`
   padding-left: 1rem;
 `
 export const Input = styled.input`

@@ -17,12 +17,12 @@ export function TableFilteredLixeiras({
   }
 
   const filterLixeiraByNome = (nomeLixeira) => {
-    console.log('COMPARACAO nomeLixeira: ' + nomeLixeira)
-    console.log(
-      lixeiras.filter((lix) =>
-        lix.descricao.toLowerCase().includes(nomeLixeira.toLowerCase()),
-      ),
-    )
+    // console.log('COMPARACAO nomeLixeira: ' + nomeLixeira)
+    // console.log(
+    //  lixeiras.filter((lix) =>
+    //    lix.descricao.toLowerCase().includes(nomeLixeira.toLowerCase()),
+    //  ),
+    // )
     return lixeiras.filter((lix) =>
       lix.descricao.toLowerCase().includes(nomeLixeira.toLowerCase()),
     )
@@ -44,21 +44,21 @@ export function TableFilteredLixeiras({
   }
 
   const verifica = (nomeLixeira, idLixeira) => {
-    console.log('entrou 1')
+    // console.log('entrou 1')
     if (nomeLixeira !== '') {
-      console.log('entrou 2')
+      // console.log('entrou 2')
       return filterLixeiraByNome(nomeLixeira)
     }
     console.log('passou nome lixeira')
     if (idLixeira !== '') {
-      console.log('idLixeira: ' + idLixeira)
+      // console.log('idLixeira: ' + idLixeira)
       return filterLixeiraById(idLixeira)
     }
   }
 
   useEffect(() => {
-    console.log(nomeLixeira)
-    console.log(idLixeira)
+    // console.log(nomeLixeira)
+    // console.log(idLixeira)
   }, [nomeLixeira, idLixeira])
 
   return (

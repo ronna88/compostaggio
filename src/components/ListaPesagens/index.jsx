@@ -34,34 +34,15 @@ export function ListaPesagens() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // console.log(lixeiras)
-    if (!localStorage.getItem('lixeiras')) {
+    if (lixeiras.length === 0) {
       carregarLixeiras()
     }
-    console.log(lixeiras.length === 0)
-    if (lixeiras.length === 0) {
-      setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
-    }
-    if (!localStorage.getItem('ilhas')) {
+    if (ilhas.length === 0) {
       carregarIlhas()
     }
-    if (ilhas.length === 0) {
-      setIlhas(JSON.parse(localStorage.getItem('ilhas')))
-    }
-    if (!localStorage.getItem('rotas')) {
+    if (rotas.length === 0) {
       carregarRotas()
     }
-    if (rotas.length === 0) {
-      setRotas(JSON.parse(localStorage.getItem('rotas')))
-    }
-    setTimeout(() => {
-      // setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
-      // setIlhas(JSON.parse(localStorage.getItem('ilhas')))
-      // setRotas(JSON.parse(localStorage.getItem('rotas')))
-      if (rotas.size > 0) {
-        setLoading(false)
-      }
-    }, 2000)
     // console.log(rotas)
   }, [])
 
@@ -111,7 +92,7 @@ export function ListaPesagens() {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
+              {rotas ? (
                 rotas.map((rota) => {
                   console.log(rota)
                   const date = new Date(rota.date.seconds * 1000)

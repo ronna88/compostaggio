@@ -37,7 +37,7 @@ export const FilterButtons = styled.button`
     props.selected === props.label ? '#f7941e' : '#00644e'};
   color: #fff;
   border-radius: 6px;
-  padding: 8px;
+  padding: 3px;
   &:hover {
     background-color: #f7941e;
   }

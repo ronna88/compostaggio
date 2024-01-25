@@ -32,20 +32,25 @@ export function Monitoramento() {
   const [monitoramentos4, setMonitoramentos4] = useState([])
   const [monitoramentos5, setMonitoramentos5] = useState([])
   const [monitoramentos6, setMonitoramentos6] = useState([])
+  const [monitoramentos7, setMonitoramentos7] = useState([])
+  const [monitoramentos8, setMonitoramentos8] = useState([])
+  const [loading, setLoading] = useState([])
   const [selectedMonitoramento, setSelectedMonitoramento] = useState([])
   const [selected, setSelected] = useState()
   const [inicio, setInicio] = useState()
   const [final, setFinal] = useState()
 
   const carregarMonitoramentos = (inicio, final) => {
+    setLoading(true)
     const agora = new Date()
-    const expireMonitoramentos = new Date(agora.getTime() + 60 * 60 * 1000)
+    // const expireMonitoramentos = new Date(agora.getTime() + 60 * 60 * 1000)
     const dataSemFiltro =
-      ('0' + agora.getDate()).slice(-2) +
+      agora.getFullYear() +
       '/' +
-      ('0' + (agora.getMonth() - 2)).slice(-2) +
+      ('0' + (agora.getMonth() + 1)).slice(-2) +
       '/' +
-      agora.getFullYear()
+      ('0' + (agora.getDate() - 5)).slice(-2)
+
     const fetchMonitoramentos = async (inicio, final) => {
       const monitoramentoCollection = collection(firestore, 'monitoramento1')
       if (!final) {
@@ -67,18 +72,9 @@ export function Monitoramento() {
           ...doc.data(),
         })),
       )
-      localStorage.setItem(
-        'monitoramentos',
-        JSON.stringify(
-          monitoramentosSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          })),
-        ),
-      )
     }
     const fetchMonitoramentos2 = async (inicio, final) => {
-      const monitoramentoCollection = collection(firestore, 'monitoramento2')
+      const monitoramento2Collection = collection(firestore, 'monitoramento2')
       if (!final) {
         final = new Date(agora.getTime() + 24 * 60 * 60 * 1000)
       }
@@ -86,30 +82,21 @@ export function Monitoramento() {
         inicio = dataSemFiltro
       }
       const q = query(
-        monitoramentoCollection,
+        monitoramento2Collection,
         where('timestamp', '>=', Date.parse(inicio) / 1000),
         where('timestamp', '<=', Date.parse(final) / 1000),
         orderBy('timestamp', 'asc'),
       )
-      const monitoramentosSnapshot = await getDocs(q)
+      const monitoramentos2Snapshot = await getDocs(q)
       setMonitoramentos2(
-        monitoramentosSnapshot.docs.map((doc) => ({
+        monitoramentos2Snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         })),
-      )
-      localStorage.setItem(
-        'monitoramentos2',
-        JSON.stringify(
-          monitoramentosSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          })),
-        ),
       )
     }
     const fetchMonitoramentos3 = async (inicio, final) => {
-      const monitoramentoCollection = collection(firestore, 'monitoramento3')
+      const monitoramento3Collection = collection(firestore, 'monitoramento3')
       if (!final) {
         final = new Date(agora.getTime() + 24 * 60 * 60 * 1000)
       }
@@ -117,30 +104,21 @@ export function Monitoramento() {
         inicio = dataSemFiltro
       }
       const q = query(
-        monitoramentoCollection,
+        monitoramento3Collection,
         where('timestamp', '>=', Date.parse(inicio) / 1000),
         where('timestamp', '<=', Date.parse(final) / 1000),
         orderBy('timestamp', 'asc'),
       )
-      const monitoramentosSnapshot = await getDocs(q)
+      const monitoramentos3Snapshot = await getDocs(q)
       setMonitoramentos3(
-        monitoramentosSnapshot.docs.map((doc) => ({
+        monitoramentos3Snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         })),
-      )
-      localStorage.setItem(
-        'monitoramentos3',
-        JSON.stringify(
-          monitoramentosSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          })),
-        ),
       )
     }
     const fetchMonitoramentos4 = async (inicio, final) => {
-      const monitoramentoCollection = collection(firestore, 'monitoramento4')
+      const monitoramento4Collection = collection(firestore, 'monitoramento4')
       if (!final) {
         final = new Date(agora.getTime() + 24 * 60 * 60 * 1000)
       }
@@ -148,30 +126,21 @@ export function Monitoramento() {
         inicio = dataSemFiltro
       }
       const q = query(
-        monitoramentoCollection,
+        monitoramento4Collection,
         where('timestamp', '>=', Date.parse(inicio) / 1000),
         where('timestamp', '<=', Date.parse(final) / 1000),
         orderBy('timestamp', 'asc'),
       )
-      const monitoramentosSnapshot = await getDocs(q)
+      const monitoramentos4Snapshot = await getDocs(q)
       setMonitoramentos4(
-        monitoramentosSnapshot.docs.map((doc) => ({
+        monitoramentos4Snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         })),
-      )
-      localStorage.setItem(
-        'monitoramentos4',
-        JSON.stringify(
-          monitoramentosSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          })),
-        ),
       )
     }
     const fetchMonitoramentos5 = async (inicio, final) => {
-      const monitoramentoCollection = collection(firestore, 'monitoramento5')
+      const monitoramento5Collection = collection(firestore, 'monitoramento5')
       if (!final) {
         final = new Date(agora.getTime() + 24 * 60 * 60 * 1000)
       }
@@ -179,30 +148,21 @@ export function Monitoramento() {
         inicio = dataSemFiltro
       }
       const q = query(
-        monitoramentoCollection,
+        monitoramento5Collection,
         where('timestamp', '>=', Date.parse(inicio) / 1000),
         where('timestamp', '<=', Date.parse(final) / 1000),
         orderBy('timestamp', 'asc'),
       )
-      const monitoramentosSnapshot = await getDocs(q)
+      const monitoramentos5Snapshot = await getDocs(q)
       setMonitoramentos5(
-        monitoramentosSnapshot.docs.map((doc) => ({
+        monitoramentos5Snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         })),
-      )
-      localStorage.setItem(
-        'monitoramentos5',
-        JSON.stringify(
-          monitoramentosSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          })),
-        ),
       )
     }
     const fetchMonitoramentos6 = async (inicio, final) => {
-      const monitoramentoCollection = collection(firestore, 'monitoramento6')
+      const monitoramento6Collection = collection(firestore, 'monitoramento6')
       if (!final) {
         final = new Date(agora.getTime() + 24 * 60 * 60 * 1000)
       }
@@ -210,59 +170,76 @@ export function Monitoramento() {
         inicio = dataSemFiltro
       }
       const q = query(
-        monitoramentoCollection,
+        monitoramento6Collection,
         where('timestamp', '>=', Date.parse(inicio) / 1000),
         where('timestamp', '<=', Date.parse(final) / 1000),
         orderBy('timestamp', 'asc'),
       )
-      const monitoramentosSnapshot = await getDocs(q)
+      const monitoramentos6Snapshot = await getDocs(q)
       setMonitoramentos6(
-        monitoramentosSnapshot.docs.map((doc) => ({
+        monitoramentos6Snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         })),
       )
-      localStorage.setItem(
-        'monitoramentos6',
-        JSON.stringify(
-          monitoramentosSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          })),
-        ),
+    }
+    const fetchMonitoramentos7 = async (inicio, final) => {
+      const monitoramento7Collection = collection(firestore, 'monitoramento7')
+      if (!final) {
+        final = new Date(agora.getTime() + 24 * 60 * 60 * 1000)
+      }
+      if (!inicio) {
+        inicio = dataSemFiltro
+      }
+      const q = query(
+        monitoramento7Collection,
+        where('timestamp', '>=', Date.parse(inicio) / 1000),
+        where('timestamp', '<=', Date.parse(final) / 1000),
+        orderBy('timestamp', 'asc'),
+      )
+      const monitoramentos7Snapshot = await getDocs(q)
+      setMonitoramentos7(
+        monitoramentos7Snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })),
       )
     }
-
-    if (
-      !localStorage.getItem('monitoramentos') ||
-      !localStorage.getItem('expireMonitoramentos')
-    ) {
-      fetchMonitoramentos(inicio, final)
-      fetchMonitoramentos2(inicio, final)
-      fetchMonitoramentos3(inicio, final)
-      fetchMonitoramentos4(inicio, final)
-      fetchMonitoramentos5(inicio, final)
-      fetchMonitoramentos6(inicio, final)
-      localStorage.setItem('expireMonitoramentos', expireMonitoramentos)
+    const fetchMonitoramentos8 = async (inicio, final) => {
+      const monitoramento8Collection = collection(firestore, 'monitoramento8')
+      if (!final) {
+        final = new Date(agora.getTime() + 24 * 60 * 60 * 1000)
+      }
+      if (!inicio) {
+        inicio = dataSemFiltro
+      }
+      const q = query(
+        monitoramento8Collection,
+        where('timestamp', '>=', Date.parse(inicio) / 1000),
+        where('timestamp', '<=', Date.parse(final) / 1000),
+        orderBy('timestamp', 'asc'),
+      )
+      const monitoramentos8Snapshot = await getDocs(q)
+      setMonitoramentos8(
+        monitoramentos8Snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })),
+      )
     }
-    if (agora > localStorage.getItem('expireMonitoramentos')) {
-      fetchMonitoramentos(inicio, final)
-      fetchMonitoramentos2(inicio, final)
-      fetchMonitoramentos3(inicio, final)
-      fetchMonitoramentos4(inicio, final)
-      fetchMonitoramentos5(inicio, final)
-      fetchMonitoramentos6(inicio, final)
-      localStorage.setItem('expireMonitoramentos', expireMonitoramentos)
-    }
+    fetchMonitoramentos(inicio, final)
+    fetchMonitoramentos2(inicio, final)
+    fetchMonitoramentos3(inicio, final)
+    fetchMonitoramentos4(inicio, final)
+    fetchMonitoramentos5(inicio, final)
+    fetchMonitoramentos6(inicio, final)
+    fetchMonitoramentos7(inicio, final)
+    fetchMonitoramentos8(inicio, final)
   }
 
   useEffect(() => {
-    if (!localStorage.getItem('monitoramentos')) {
-      carregarMonitoramentos(inicio, final)
-    }
-
     if (monitoramentos.length === 0) {
-      setMonitoramentos(JSON.parse(localStorage.getItem('monitoramentos')))
+      carregarMonitoramentos(inicio, final)
     }
 
     if (!selectedMonitoramento) {
@@ -291,13 +268,19 @@ export function Monitoramento() {
       case '6':
         setSelectedMonitoramento(monitoramentos6)
         break
+      case '7':
+        setSelectedMonitoramento(monitoramentos7)
+        break
+      case '8':
+        setSelectedMonitoramento(monitoramentos8)
+        break
       default:
         setSelectedMonitoramento(monitoramentos)
     }
   }
 
   const filterData = () => {
-    console.log('botao')
+    // console.log('botao')
     carregarMonitoramentos(inicio, final)
   }
 
@@ -367,6 +350,20 @@ export function Monitoramento() {
               onClick={handleClickFilter}
             >
               COMPOSTEIRA 6
+            </FilterButtons>
+            <FilterButtons
+              label="7"
+              selected={selected}
+              onClick={handleClickFilter}
+            >
+              COMPOSTEIRA 7
+            </FilterButtons>
+            <FilterButtons
+              label="8"
+              selected={selected}
+              onClick={handleClickFilter}
+            >
+              COMPOSTEIRA 8
             </FilterButtons>
           </FilterButtonContainer>
           <FormContainer>
