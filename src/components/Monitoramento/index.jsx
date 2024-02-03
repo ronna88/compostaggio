@@ -22,6 +22,7 @@ import {
   FormContainer,
   FormButton,
   DownloadLink,
+  Tr,
 } from './styles'
 
 export function Monitoramento() {
@@ -416,7 +417,7 @@ export function Monitoramento() {
               {selectedMonitoramento ? (
                 selectedMonitoramento.map((monitoramento) => {
                   return (
-                    <tr key={monitoramento.id}>
+                    <Tr key={monitoramento.id}>
                       <td>{monitoramento.data_hora}</td>
                       <td>
                         {parseFloat(monitoramento.temperatura1).toFixed(2)}°C
@@ -434,7 +435,7 @@ export function Monitoramento() {
                         {parseFloat(monitoramento.temperatura4).toFixed(2)}°C
                       </td>
                       <td>{monitoramento.umidade4}%</td>
-                    </tr>
+                    </Tr>
                   )
                 })
               ) : (

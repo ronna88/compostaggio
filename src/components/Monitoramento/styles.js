@@ -96,3 +96,16 @@ export const DownloadLink = styled.a`
     background-color: #00644e;
   }
 `
+
+export const Tr = styled.tr`
+  &:nth-child(even) {
+    background-color: #cdcdcd;
+  }
+`
+
+export const Td = styled.td`
+  gap: 8px;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+`

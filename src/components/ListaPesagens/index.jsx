@@ -12,6 +12,7 @@ import {
   TableData,
   TitleCard,
   ActionButtons,
+  DownloadLink,
 } from './styles'
 import { PencilSimple, Trash } from '@phosphor-icons/react'
 
@@ -71,6 +72,25 @@ export function ListaPesagens() {
     }
   }
 
+  const exportData = () => {
+    const tableRows = document.querySelectorAll('tr')
+    const CSVString = Array.from(tableRows)
+      .map((row) =>
+        Array.from(row.cells)
+          .map((cell) => cell.textContent)
+          .join(';'),
+      )
+      .join('\n')
+    document
+      .getElementById('btn-export')
+      .setAttribute(
+        'href',
+        `data:text/csvcharset=utf-8,${encodeURIComponent(CSVString)}`,
+      )
+
+    document.getElementById('btn-export').setAttribute('download', 'table.csv')
+  }
+
   return (
     <Container>
       <Card>
@@ -79,9 +99,14 @@ export function ListaPesagens() {
           <SearchBar>
             <input type="text" />
           </SearchBar>
+          <div>
+            <DownloadLink id="btn-export" onClick={exportData}>
+              Exportar
+            </DownloadLink>
+          </div>
         </CardHeader>
         <ContainerTable>
-          <TableData>
+          <TableData id="my-table">
             <thead>
               <tr>
                 <th>ID</th>
