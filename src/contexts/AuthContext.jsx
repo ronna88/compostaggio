@@ -25,8 +25,12 @@ async function usuarioNormalizado(usuarioFirebase) {
 
 function gerenciarCookie(logado) {
   if (logado) {
+    const d = new Date()
+    var inFifteenMinutes = new Date(new Date().getTime() + 30 * 60 * 1000)
+    console.log(inFifteenMinutes)
+    console.log(d)
     Cookies.set('compostagio-auth', logado, {
-      expires: 7,
+      expires: inFifteenMinutes,
     })
   } else {
     Cookies.remove('compostagio-auth')
