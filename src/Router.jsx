@@ -40,14 +40,21 @@ export function Router() {
     if (Cookies.get('compostagio-auth')) {
       return <>{children}</>
     } else {
-      return <Navigate to="/" />
+      return <Navigate to="/login" />
     }
   }
 
   return (
     <Routes>
-      <Route path="/" element={<DefaultLayout />}>
-        <Route path="/" element={<Login />} />
+      <Route path="/login" element={<Login />} />
+      <Route
+        path="/"
+        element={
+          <PrivateRoute>
+            <DefaultLayout />
+          </PrivateRoute>
+        }
+      >
         <Route
           path="/cadastro-ilha"
           element={

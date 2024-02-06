@@ -1,4 +1,4 @@
-import { createContext, useState } from 'react'
+import { createContext, useEffect, useState } from 'react'
 import { app } from '../services/firebase'
 import {
   addDoc,
@@ -7,10 +7,16 @@ import {
   getDocs,
   orderBy,
   query,
+  CACHE_SIZE_UNLIMITED,
+  initializeFirestore,
 } from 'firebase/firestore'
 
+const firestore = initializeFirestore(app, {
+  cacheSizeBytes: CACHE_SIZE_UNLIMITED,
+})
+
 const IlhaContext = createContext({})
-const firestore = getFirestore(app)
+const firestoreDb = getFirestore(app)
 
 const IlhaProvider = ({ children }) => {
   const [ilhas, setIlhas] = useState([])
@@ -21,8 +27,8 @@ const IlhaProvider = ({ children }) => {
 
   const carregarIlhas = () => {
     console.log('carregarIlhas...')
-    const agora = new Date()
-    const expireIlhas = new Date(agora.getTime() + 60 * 60 * 1000)
+    // const agora = new Date()
+    // const expireIlhas = new Date(agora.getTime() + 60 * 60 * 1000)
 
     const fetchIlhas = async () => {
       console.log('iniciando consulta de ilhas')
@@ -34,33 +40,16 @@ const IlhaProvider = ({ children }) => {
           ...doc.data(),
         })),
       )
-      localStorage.setItem(
-        'ilhas',
-        JSON.stringify(
-          ilhasSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          })),
-        ),
-      )
-      localStorage.setItem('expireIlhas', expireIlhas)
+      // console.log(ilhasSnapshot)
     }
-    if (
-      !localStorage.getItem('ilhas') ||
-      !localStorage.getItem('expireIlhas')
-    ) {
-      fetchIlhas()
-    }
-    if (agora > localStorage.getItem('expireIlhas')) {
-      console.log('Fora do prazo de cache...')
-      fetchIlhas()
-    }
+    // console.log(ilhas)
+    fetchIlhas()
   }
 
   const carregarLixeiras = () => {
     console.log('carregarLixeiras...')
-    const agora = new Date()
-    const expireLixeiras = new Date(agora.getTime() + 60 * 60 * 1000)
+    // const agora = new Date()
+    // const expireLixeiras = new Date(agora.getTime() + 60 * 60 * 1000)
 
     const fetchLixeiras = async () => {
       console.log('iniciando consulta de lixeiras')
@@ -72,69 +61,35 @@ const IlhaProvider = ({ children }) => {
           ...doc.data(),
         })),
       )
-      localStorage.setItem(
-        'lixeiras',
-        JSON.stringify(
-          lixeirasSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          })),
-        ),
-      )
-      localStorage.setItem('expireLixeiras', expireLixeiras)
+      console.log(lixeirasSnapshot)
     }
-    if (
-      !localStorage.getItem('lixeiras') ||
-      !localStorage.getItem('expireLixeiras') ||
-      JSON.parse(localStorage.getItem('lixeiras')).length === 0
-    ) {
-      fetchLixeiras()
-    }
-    if (agora > localStorage.getItem('expireLixeiras')) {
-      console.log('Fora do prazo de cache...')
-      fetchLixeiras()
-    }
-    setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
+    console.log(lixeiras)
+    fetchLixeiras()
   }
 
   const carregarComposteiras = () => {
     console.log('carregarComposteiras...')
-    const agora = new Date()
-    const expireComposteiras = new Date(agora.getTime() + 60 * 60 * 1000)
+    // const agora = new Date()
+    // const expireComposteiras = new Date(agora.getTime() + 60 * 60 * 1000)
 
     const fetchComposteiras = async () => {
       console.log('Iniciando consulta das composteiras')
       const composteirasCollection = collection(firestore, 'composteiras')
       const composteirasSnapshot = await getDocs(composteirasCollection)
-      localStorage.setItem(
-        'composteiras',
-        JSON.stringify(
-          composteirasSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          })),
-        ),
+      setComposteiras(
+        composteirasSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })),
       )
-      localStorage.setItem('expireComposteiras', expireComposteiras)
-      setComposteiras(JSON.stringify(localStorage.getItem('composteiras')))
     }
-    if (
-      !localStorage.getItem('composteiras') ||
-      !localStorage.getItem('expireComposteiras') ||
-      JSON.parse(localStorage.getItem('composteiras')).length === 0
-    ) {
-      fetchComposteiras()
-    }
-    if (agora > localStorage.getItem('expireComposteiras')) {
-      console.log('Fora do prazo de cache...')
-      fetchComposteiras()
-    }
+    fetchComposteiras()
   }
 
   const carregarRotas = () => {
     console.log('carregarRotas...')
-    const agora = new Date()
-    const expireRotas = new Date(agora.getTime() + 60 * 60 * 1000)
+    // const agora = new Date()
+    // const expireRotas = new Date(agora.getTime() + 60 * 60 * 1000)
 
     const fetchRotas = async () => {
       console.log('Iniciando consulta das rotas')
@@ -142,37 +97,32 @@ const IlhaProvider = ({ children }) => {
       const rotasSnapshot = await getDocs(
         query(rotasCollection, orderBy('date', 'asc')),
       )
-      localStorage.setItem(
-        'rotas',
-        JSON.stringify(
-          rotasSnapshot.docs.map((doc) => ({
+      setRotas(
+        rotasSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })),
+      )
+    }
+    fetchRotas()
+  }
+
+  const carregarRotasDisponiveis = () => {
+    const fetchRotasDisponiveis = async () => {
+      console.log('Iniciando consulta das rotas')
+      const rotasCollection = collection(firestore, 'rotas')
+      const rotasSnapshot = await getDocs(rotasCollection)
+
+      await setRotasSemDespejo(
+        rotasSnapshot.docs
+          .map((doc) => ({
             id: doc.id,
             ...doc.data(),
-          })),
-        ),
+          }))
+          .filter((r) => r.livre !== 'nao'),
       )
-      setRotas(JSON.parse(localStorage.getItem('rotas')))
-      localStorage.setItem('expireRotas', expireRotas)
     }
-    if (
-      !localStorage.getItem('rotas') ||
-      !localStorage.getItem('expireRotas') ||
-      JSON.parse(localStorage.getItem('rotas')).length === 0
-    ) {
-      fetchRotas()
-    }
-    if (agora > localStorage.getItem('expireRotas')) {
-      console.log('Fora do prazo de cache...')
-      fetchRotas()
-    }
-
-    setTimeout(() => {
-      setRotasSemDespejo(
-        JSON.parse(localStorage.getItem('rotas')).filter(
-          (rota) => rota.livre !== 'nao',
-        ),
-      )
-    }, 2000)
+    fetchRotasDisponiveis()
   }
 
   const ilhaContextData = {
@@ -190,6 +140,7 @@ const IlhaProvider = ({ children }) => {
     setRotasSemDespejo,
     rotas,
     setRotas,
+    carregarRotasDisponiveis,
   }
 
   return (

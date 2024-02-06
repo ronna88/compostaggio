@@ -14,31 +14,24 @@ import {
   FormContent,
 } from './styles'
 import { TableFilteredLixeiras } from '../../components/TableFilteredLixeiras'
+import { toast } from 'react-toastify'
 
 export function BuscaForm() {
   const [idLixeira, setIdLixeira] = useState('')
   const [nomeLixeira, setNomeLixeira] = useState('')
   const [lixeira, setLixeira] = useState()
   const navigate = useNavigate()
-  const { carregarLixeiras, lixeiras } = useContext(IlhaContext)
+  const { carregarLixeiras, lixeiras, ilhas } = useContext(IlhaContext)
 
   const buscarLixeira = () => {
     event.preventDefault()
     carregarLixeiras()
-    // let lixeira = {}
-    /*
-    setTimeout(() => {
-      if (JSON.parse(localStorage.getItem('lixeiras')).length !== 0) {
-        lixeira = JSON.parse(localStorage.getItem('lixeiras')).filter(
-          (l) => l.id === idLixeira,
-        )
-      } */
-    console.log('dentro')
-    console.log(lixeiras)
-    console.log('lixeira filtrada ')
-    console.log(lixeira)
-    navigate('/peso/' + lixeira)
-    // }, 3000)
+    if (!lixeira || lixeira === 'Selecione a lixeira') {
+      toast.error('Lixeira não Selecionada!')
+    } else {
+      console.log(lixeira)
+      navigate('/peso/' + lixeira)
+    }
   }
 
   function onChangeNomeLixeiraHandler(e) {
@@ -50,6 +43,12 @@ export function BuscaForm() {
     setNomeLixeira('')
     setIdLixeira(e.target.value)
   }
+
+  useEffect(() => {
+    if (lixeiras.length === 0) {
+      carregarLixeiras()
+    }
+  }, [lixeiras])
 
   return (
     <Container>
@@ -85,8 +84,8 @@ export function BuscaForm() {
               </InputContainer>
             </FormContent>
             <TableFilteredLixeiras
-              lixeiras={JSON.parse(localStorage.getItem('lixeiras'))}
-              ilhas={JSON.parse(localStorage.getItem('ilhas'))}
+              lixeiras={lixeiras}
+              ilhas={ilhas}
               nomeLixeira={nomeLixeira}
               idLixeira={idLixeira}
               lixeira={lixeira}

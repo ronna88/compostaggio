@@ -24,7 +24,6 @@ import { toast } from 'react-toastify'
 import { AuthContext } from '../../contexts/AuthContext'
 
 export function DespejoForm() {
-  const [lixeiras, setLixeiras] = useState([])
   const [composteira, setComposteira] = useState([])
   const [edit, setEdit] = useState(false)
   const [rota, setRota] = useState({ id: '' })
@@ -34,50 +33,18 @@ export function DespejoForm() {
   const { idDespejo } = useParams()
   const {
     carregarLixeiras,
+    lixeiras,
     carregarComposteiras,
     composteiras,
     setComposteiras,
+    carregarRotasDisponiveis,
+    rotasSemDespejo,
   } = useContext(IlhaContext)
   const { usuario } = useContext(AuthContext)
 
-  const carregarRotasDisponiveis = () => {
-    const fetchRotas = async () => {
-      console.log('Iniciando consulta das rotas')
-      const rotasCollection = collection(firestore, 'rotas')
-      const rotasSnapshot = await getDocs(rotasCollection)
-
-      await setRotaLivre(
-        rotasSnapshot.docs
-          .map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-          .filter((r) => r.livre !== 'nao'),
-      )
-
-      localStorage.setItem(
-        'rotas',
-        JSON.stringify(
-          rotasSnapshot.docs
-            .map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }))
-            .filter((r) => r.livre !== 'nao'),
-        ),
-      )
-    }
-
-    fetchRotas()
-
-    if (rotaLivre.length === 0) {
-      toast.warning('Sem Pesagens disponíveis para despejar nas composteiras!')
-    }
-  }
-
   const cadastrarDespejo = () => {
     event.preventDefault()
-    let novoDespejo = {
+    const novoDespejo = {
       rota,
       composteira,
       usuario: usuario.email,
@@ -86,13 +53,13 @@ export function DespejoForm() {
     }
     addDoc(collection(firestore, 'despejos'), novoDespejo)
       .then((docRef) => {
-        let despejos = []
-        if (localStorage.getItem('despejos')) {
-          despejos = JSON.parse(localStorage.getItem('despejos'))
-        }
-        novoDespejo = { ...novoDespejo, id: docRef.id }
-        despejos.push(novoDespejo)
-        localStorage.setItem('despejos', JSON.stringify(despejos))
+        // let despejos = []
+        // if (localStorage.getItem('despejos')) {
+        //   despejos = JSON.parse(localStorage.getItem('despejos'))
+        // }
+        // novoDespejo = { ...novoDespejo, id: docRef.id }
+        // despejos.push(novoDespejo)
+        // localStorage.setItem('despejos', JSON.stringify(despejos))
 
         updateRota(novoDespejo.rota)
         toast.success('Despejo de resíduo cadastrado com sucesso.')
@@ -123,11 +90,12 @@ export function DespejoForm() {
     const updatedRota = { ...rota, livre: 'nao' }
     updateDoc(doc(collection(firestore, 'rotas'), idRota), updatedRota).then(
       () => {
-        const rotas = JSON.parse(localStorage.getItem('rotas')).filter(
-          (rota) => rota.id !== idRota,
-        )
-        rotas.push(updatedRota)
-        localStorage.setItem('rotas', JSON.stringify(rotas))
+        // const rotas = JSON.parse(localStorage.getItem('rotas')).filter(
+        //  (rota) => rota.id !== idRota,
+        // )
+        // rotas.push(updatedRota)
+        // localStorage.setItem('rotas', JSON.stringify(rotas))
+        toast.success('Rota atualizada com sucesso!')
       },
     )
   }
@@ -137,25 +105,11 @@ export function DespejoForm() {
   }
 
   useEffect(() => {
-    if (
-      !localStorage.getItem('lixeiras') ||
-      localStorage.getItem('lixeiras').length === 0
-    ) {
+    if (lixeiras.length === 0) {
       carregarLixeiras()
-
-      setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
     }
-    if (localStorage.getItem('lixeiras')) {
-      setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
-    }
-    if (
-      !localStorage.getItem('composteiras') ||
-      localStorage.getItem('composteiras').length === 0
-    ) {
+    if (composteiras.length === 0) {
       carregarComposteiras()
-    }
-    if (localStorage.getItem('composteiras') && composteiras.length === 0) {
-      setComposteiras(JSON.parse(localStorage.getItem('composteiras')))
     }
 
     carregarRotasDisponiveis()

@@ -20,9 +20,11 @@ import {
   LabelForm,
   SaveButton,
   TitleCard,
+  SubTitleCard,
 } from './styles'
 import { toast } from 'react-toastify'
 import { AuthContext } from '../../contexts/AuthContext'
+import { IlhaContext } from '../../contexts/IlhasContext'
 
 export function PesoForm() {
   const [edit, setEdit] = useState(false)
@@ -35,6 +37,7 @@ export function PesoForm() {
   const firestore = getFirestore(app)
 
   const { usuario } = useContext(AuthContext)
+  const { lixeiras } = useContext(IlhaContext)
 
   const salvarRota = () => {
     event.preventDefault()
@@ -45,7 +48,7 @@ export function PesoForm() {
       idLixeira,
       livre: 'sim',
     }
-    if (!peso || !date) {
+    if (!peso || !date || peso === ' ' || date === ' ') {
       toast.warning('Por favor, preencha todos os campos.')
       return
     }
@@ -144,6 +147,13 @@ export function PesoForm() {
       <Card>
         <CardHeader>
           <TitleCard>PESAGEM DA LIXEIRA</TitleCard>
+          <SubTitleCard>
+            {'COD: ' +
+              lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0]
+                .descricao +
+              ' TIPO: ' +
+              lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0].nome}
+          </SubTitleCard>
         </CardHeader>
         <div className="card-body">
           <form>

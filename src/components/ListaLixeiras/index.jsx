@@ -17,26 +17,24 @@ import { PencilSimple, Trash } from '@phosphor-icons/react'
 
 export function ListaLixeiras() {
   const firestore = getFirestore(app)
-  const { carregarLixeiras, carregarIlhas } = useContext(IlhaContext)
-  const [lixeiras, setLixeiras] = useState([])
-  const [ilhas, setIlhas] = useState([])
+  const {
+    carregarLixeiras,
+    carregarIlhas,
+    lixeiras,
+    setLixeiras,
+    ilhas,
+    setIlhas,
+  } = useContext(IlhaContext)
+  // const [lixeiras1, setLixeiras1] = useState([])
+  // const [ilhas, setIlhas] = useState([])
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     console.log(lixeiras)
-    if (!localStorage.getItem('lixeiras')) {
+    if (lixeiras.length === 0) {
       carregarLixeiras()
     }
-    if (!localStorage.getItem('ilhas')) {
-      carregarIlhas()
-    }
-    setTimeout(() => {
-      setLixeiras(JSON.parse(localStorage.getItem('lixeiras')))
-      setLoading(false)
-      setIlhas(JSON.parse(localStorage.getItem('ilhas')))
-    }, 2000)
-  }, [])
+  }, [lixeiras])
 
   const filterNomeIlha = (ilhaId) => {
     const ilha = ilhas.find((i) => i.id === ilhaId)
@@ -79,7 +77,7 @@ export function ListaLixeiras() {
               </tr>
             </thead>
             <tbody>
-              {!loading ? (
+              {lixeiras ? (
                 lixeiras.map((lixeira) => {
                   return (
                     <tr key={lixeira.id}>

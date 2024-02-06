@@ -36,6 +36,18 @@ export const SearchBar = styled.div`
     padding: 1.3rem; /* espaço para o ícone */
   }
 `
+export const DownloadLink = styled.a`
+  border: none;
+  background-color: #f7941e;
+  color: #fff;
+  border-radius: 6px;
+  padding: 3px;
+  width: 70px;
+  text-decoration: none;
+  &:hover {
+    background-color: #00644e;
+  }
+`
 export const ActionButtons = styled.button`
   border: none;
   cursor: pointer;

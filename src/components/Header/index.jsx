@@ -39,7 +39,7 @@ export function Header() {
         </ButtonMenu>
         <img src={IMGLogo} alt="Logo Reciclagem" width={150} />
 
-        <ButtonMenu>
+        <ButtonMenu to="monitoramento">
           <ListDashes />
           <span>DADOS DE MONITORIAMENTO</span>
         </ButtonMenu>

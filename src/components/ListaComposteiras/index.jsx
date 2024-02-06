@@ -17,20 +17,17 @@ import { PencilSimple, Trash } from '@phosphor-icons/react'
 
 export function ListaComposteira() {
   const firestore = getFirestore(app)
-  const [composteiras, setComposteiras] = useState([])
+  // const [composteiras, setComposteiras] = useState([])
   const [loading, setLoading] = useState([])
-  const { carregarComposteiras } = useContext(IlhaContext)
+  const { carregarComposteiras, composteiras, setComposteiras } =
+    useContext(IlhaContext)
   const navigate = useNavigate()
 
   useEffect(() => {
     console.log(composteiras)
-    if (!localStorage.getItem('composteiras')) {
+    if (composteiras.length === 0) {
       carregarComposteiras()
     }
-    setTimeout(() => {
-      setLoading(false)
-      setComposteiras(JSON.parse(localStorage.getItem('composteiras')))
-    }, 2000)
   }, [])
 
   const deleteComposteira = async (composteiraId) => {
@@ -65,7 +62,7 @@ export function ListaComposteira() {
               </tr>
             </thead>
             <tbody>
-              {!loading ? (
+              {composteiras ? (
                 composteiras.map((composteira) => {
                   return (
                     <tr key={composteira.id}>

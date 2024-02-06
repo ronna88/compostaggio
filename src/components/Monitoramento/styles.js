@@ -37,7 +37,7 @@ export const FilterButtons = styled.button`
     props.selected === props.label ? '#f7941e' : '#00644e'};
   color: #fff;
   border-radius: 6px;
-  padding: 8px;
+  padding: 3px;
   &:hover {
     background-color: #f7941e;
   }
@@ -95,4 +95,17 @@ export const DownloadLink = styled.a`
   &:hover {
     background-color: #00644e;
   }
+`
+
+export const Tr = styled.tr`
+  &:nth-child(even) {
+    background-color: #cdcdcd;
+  }
+`
+
+export const Td = styled.td`
+  gap: 8px;
+  align-items: center;
+  display: flex;
+  justify-content: center;
 `

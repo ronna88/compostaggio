@@ -1,7 +1,12 @@
 import { useContext, useEffect, useState } from 'react'
 import { IlhaContext } from '../../contexts/IlhasContext'
 import { useNavigate } from 'react-router-dom'
-import { deleteDoc, getFirestore, doc } from 'firebase/firestore'
+import {
+  deleteDoc,
+  getFirestore,
+  doc,
+  memoryLocalCache,
+} from 'firebase/firestore'
 import { app } from '../../services/firebase'
 import {
   Card,
@@ -17,20 +22,15 @@ import { PencilSimple, Trash } from '@phosphor-icons/react'
 
 export function ListaIlhas() {
   const firestore = getFirestore(app)
-  const { carregarIlhas, carregarLixeiras } = useContext(IlhaContext)
-  const [ilhas, setIlhas] = useState([])
+  const { carregarIlhas, carregarLixeiras, ilhas } = useContext(IlhaContext)
+  const [ilhasCarregadas, setIlhasCarregadas] = useState([])
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!localStorage.getItem('ilhas')) {
+    console.log(ilhas)
+    if (ilhas.length === 0) {
+      console.log('entrou')
       carregarIlhas()
-    } else {
-      if (ilhas.length === 0) {
-        setIlhas(JSON.parse(localStorage.getItem('ilhas')))
-      }
-    }
-    if (!localStorage.getItem('lixeiras')) {
-      carregarLixeiras()
     }
   }, [ilhas])
 
@@ -39,7 +39,9 @@ export function ListaIlhas() {
     try {
       await deleteDoc(ilhaRef)
       console.log('Ilha Excluida')
-      setIlhas((prevList) => prevList.filter((ilha) => ilha.id !== ilhaId))
+      setIlhasCarregadas((prevList) =>
+        prevList.filter((ilha) => ilha.id !== ilhaId),
+      )
     } catch {
       console.log()
     }
