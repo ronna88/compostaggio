@@ -6,6 +6,8 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
+  setPersistence,
+  browserSessionPersistence,
 } from 'firebase/auth'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
@@ -23,13 +25,13 @@ async function usuarioNormalizado(usuarioFirebase) {
   }
 }
 
-function gerenciarCookie(logado) {
-  if (logado) {
+function gerenciarCookie(accessToken) {
+  if (accessToken) {
     const d = new Date()
-    var inFifteenMinutes = new Date(new Date().getTime() + 30 * 60 * 1000)
+    const inFifteenMinutes = new Date(new Date().getTime() + 30 * 60 * 1000)
     console.log(inFifteenMinutes)
     console.log(d)
-    Cookies.set('compostagio-auth', logado, {
+    Cookies.set('compostagio-auth', accessToken, {
       expires: inFifteenMinutes,
     })
   } else {
@@ -46,7 +48,7 @@ const AuthProvider = ({ children }) => {
     if (usuarioFirebase?.email) {
       const usuario = await usuarioNormalizado(usuarioFirebase)
       setUsuario(usuario)
-      gerenciarCookie(true)
+      gerenciarCookie(usuarioFirebase.accessToken)
 
       return usuario.email
     } else {
@@ -60,11 +62,13 @@ const AuthProvider = ({ children }) => {
   const signIn = async (email, passoword) => {
     try {
       const auth = getAuth(app)
+      setPersistence(auth, browserSessionPersistence)
       const reponse = await signInWithEmailAndPassword(auth, email, passoword)
 
       await configurarSessao(reponse.user)
       navigate('/ilha')
     } catch (err) {
+      console.log(err)
       toast.error('Erro ao efetuar login')
     }
   }
@@ -98,14 +102,19 @@ const AuthProvider = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (Cookies.get('compostagio-auth')) {
         if (user) {
-          try {
-            const usuario = await usuarioNormalizado(user)
-            setUsuario(usuario)
-          } catch (error) {
-            console.error('Erro ao normalizar o usuário:', error)
+          const token = user.accessToken
+          if (token === Cookies.get('compostagio-auth')) {
+            try {
+              const usuario = await usuarioNormalizado(user)
+              setUsuario(usuario)
+            } catch (error) {
+              console.error('Erro ao normalizar o usuário:', error)
+            }
+          } else {
+            setUsuario(null)
+            Cookies.remove('compostagio-auth')
+            navigate('/login')
           }
-        } else {
-          setUsuario(null)
         }
       }
     })
