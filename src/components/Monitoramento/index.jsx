@@ -40,6 +40,10 @@ export function Monitoramento() {
   const [selected, setSelected] = useState()
   const [inicio, setInicio] = useState()
   const [final, setFinal] = useState()
+  const [temp1, setTemp1] = useState()
+  const [temp2, setTemp2] = useState()
+  const [temp3, setTemp3] = useState()
+  const [temp4, setTemp4] = useState()
 
   const carregarMonitoramentos = (inicio, final) => {
     setLoading(true)
@@ -73,6 +77,7 @@ export function Monitoramento() {
           ...doc.data(),
         })),
       )
+      console.log(monitoramentosSnapshot)
     }
     const fetchMonitoramentos2 = async (inicio, final) => {
       const monitoramento2Collection = collection(firestore, 'monitoramento2')
@@ -227,6 +232,7 @@ export function Monitoramento() {
           ...doc.data(),
         })),
       )
+      console.log(monitoramentos8)
     }
     fetchMonitoramentos(inicio, final)
     fetchMonitoramentos2(inicio, final)
@@ -253,30 +259,66 @@ export function Monitoramento() {
     switch (e.target.attributes[0].nodeValue) {
       case '1':
         setSelectedMonitoramento(monitoramentos)
+        setTemp1('2813b25704e13cbc')
+        setTemp2('28c9a35704e13c06')
+        setTemp3('28730496f0013c7c')
+        setTemp4('2889e95704e13c27')
         break
       case '2':
         setSelectedMonitoramento(monitoramentos2)
+        setTemp1('28b9cb5704e13cb1')
+        setTemp2('28b74680e3e13cbf')
+        setTemp3('285cd896f0013c91')
+        setTemp4('2876af5704e13c04')
         break
       case '3':
         setSelectedMonitoramento(monitoramentos3)
+        setTemp1('28add05704e13c3a')
+        setTemp2('2851d380e3e13c41')
+        setTemp3('28c5b496f0013c86')
+        setTemp4('281bcf5704e13c9c')
         break
       case '4':
         setSelectedMonitoramento(monitoramentos4)
+        setTemp1('28b1355704e13c14')
+        setTemp2('2875d95704e13cac')
+        setTemp3('28b5e15704e13c89')
+        setTemp4('280c5880e3e13c9e')
         break
       case '5':
         setSelectedMonitoramento(monitoramentos5)
+        setTemp1('28a3c25704e13cd6')
+        setTemp2('28063507d6013c6d')
+        setTemp3('28d8965704e13c3c')
+        setTemp4('289b355704e13c6d')
         break
       case '6':
         setSelectedMonitoramento(monitoramentos6)
+        setTemp1('28148e07d6013c67')
+        setTemp2('28fe0f80e3e13c46')
+        setTemp3('285fe407d6013c46')
+        setTemp4('28f41f07d6013c34')
         break
       case '7':
         setSelectedMonitoramento(monitoramentos7)
+        setTemp1('28c12907d6013c2a')
+        setTemp2('289d6f07d6013c0c')
+        setTemp3('283e4507d6013c4c')
+        setTemp4('28badf07d6013c70')
         break
       case '8':
         setSelectedMonitoramento(monitoramentos8)
+        setTemp1('28fc9507d6013ce3')
+        setTemp2('28ecf507d6013ca9')
+        setTemp3('28764207d6013cc9')
+        setTemp4('28906207d6013caa')
         break
       default:
         setSelectedMonitoramento(monitoramentos)
+        setTemp1('2813b25704e13cbc')
+        setTemp2('28c9a35704e13c06')
+        setTemp3('28730496f0013c7c')
+        setTemp4('2889e95704e13c27')
     }
   }
 
@@ -302,6 +344,11 @@ export function Monitoramento() {
       )
 
     document.getElementById('btn-export').setAttribute('download', 'table.csv')
+  }
+
+  const Temp1 = (monitoramento) => {
+    switch (selected) {
+    }
   }
 
   return (
@@ -420,19 +467,19 @@ export function Monitoramento() {
                     <Tr key={monitoramento.id}>
                       <td>{monitoramento.data_hora}</td>
                       <td>
-                        {parseFloat(monitoramento.temperatura1).toFixed(2)}°C
+                        {parseFloat(monitoramento[`${temp1}`]).toFixed(2)}°C
                       </td>
                       <td>{monitoramento.umidade1}%</td>
                       <td>
-                        {parseFloat(monitoramento.temperatura2).toFixed(2)}°C
+                        {parseFloat(monitoramento[`${temp2}`]).toFixed(2)}°C
                       </td>
                       <td>{monitoramento.umidade2}%</td>
                       <td>
-                        {parseFloat(monitoramento.temperatura3).toFixed(2)}°C
+                        {parseFloat(monitoramento[`${temp3}`]).toFixed(2)}°C
                       </td>
                       <td>{monitoramento.umidade3}%</td>
                       <td>
-                        {parseFloat(monitoramento.temperatura4).toFixed(2)}°C
+                        {parseFloat(monitoramento[`${temp4}`]).toFixed(2)}°C
                       </td>
                       <td>{monitoramento.umidade4}%</td>
                     </Tr>
