@@ -32,7 +32,7 @@ export function LixeirasForm() {
   const { idLixeira } = useParams()
   const navigate = useNavigate()
   const firestore = getFirestore(app)
-  const { carregarIlhas } = useContext(IlhaContext)
+  const { carregarIlhas, carregarIlhasServer, carregarLixeirasServer } = useContext(IlhaContext)
   const { usuario } = useContext(AuthContext)
 
   const buscarLixeira = async () => {
@@ -85,12 +85,11 @@ export function LixeirasForm() {
     }
     addDoc(collection(firestore, 'lixeiras'), novaLixeira)
       .then((docRef) => {
-        if (localStorage.getItem('lixeiras')) {
           // 'lixeiras' já existe, você pode fazer o JSON.parse
-          const lixeiras = JSON.parse(localStorage.getItem('lixeiras'))
-          novaLixeira = { ...novaLixeira, id: docRef.id }
-          lixeiras.push(novaLixeira)
-          localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
+          // const lixeiras = JSON.parse(localStorage.getItem('lixeiras'))
+          // novaLixeira = { ...novaLixeira, id: docRef.id }
+          // lixeiras.push(novaLixeira)
+          // localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
 
           updateDoc(
             doc(collection(firestore, 'lixeiras'), novaLixeira.id),
@@ -102,17 +101,14 @@ export function LixeirasForm() {
             .catch((error) => {
               console.log(error)
             })
-        } else {
-          // 'lixeiras' não existe no localStorage, crie um novo array
-          const lixeiras = [novaLixeira]
-          localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
-        }
+        
+        carregarLixeirasServer()
         limpaEstados()
         toast.success('Lixeira cadastrada com sucesso.')
         navigate('/lixeira')
       })
       .catch((error) => {
-        toast.error('Erro ao atualizar lixeira.')
+        toast.error(`Erro ao atualizar lixeira. ${error}`)
         console.log(error)
       })
   }
@@ -130,13 +126,14 @@ export function LixeirasForm() {
 
     updateDoc(doc(collection(firestore, 'lixeiras'), idLixeira), updatedLixeira)
       .then(() => {
-        const lixeiras = JSON.parse(localStorage.getItem('lixeiras')).filter(
-          (lixeira) => lixeira.id !== idLixeira,
-        )
-        lixeiras.push(updatedLixeira)
-        localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
+        // const lixeiras = JSON.parse(localStorage.getItem('lixeiras')).filter(
+        //   (lixeira) => lixeira.id !== idLixeira,
+        // )
+        // lixeiras.push(updatedLixeira)
+        // localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
         limpaEstados()
         toast.success('Lixeira atualizada com sucesso.')
+        carregarLixeirasServer()
         navigate('/lixeira')
       })
       .catch((error) => {

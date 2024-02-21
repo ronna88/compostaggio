@@ -37,7 +37,7 @@ export function PesoForm() {
   const firestore = getFirestore(app)
 
   const { usuario } = useContext(AuthContext)
-  const { lixeiras } = useContext(IlhaContext)
+  const { lixeiras, carregarRotasServer } = useContext(IlhaContext)
 
   const salvarRota = () => {
     event.preventDefault()
@@ -48,6 +48,7 @@ export function PesoForm() {
       idLixeira,
       livre: 'sim',
     }
+
     if (!peso || !date || peso === ' ' || date === ' ') {
       toast.warning('Por favor, preencha todos os campos.')
       return
@@ -56,6 +57,16 @@ export function PesoForm() {
       .then((docRef) => {
         toast.success('Peso cadastrado com sucesso.')
         console.log(docRef.id)
+        const idCriado = docRef.id
+        carregarRotasServer()
+        addDoc(collection(firestore, 'bombonaOrganica'), {peso: peso, idLixeira: idLixeira, idRota: idCriado})
+        .then((docRef) => {
+          toast.success('Enviado a bombona Organica')
+        })
+        .catch((error) => {
+          console.lof(error)
+          toast.error('Erro ao enviar a bombona')
+        })
       })
       .catch((error) => {
         toast.error('Erro ao cadastrar peso da lixeira.')
@@ -124,20 +135,21 @@ export function PesoForm() {
 
     updateDoc(doc(collection(firestore, 'rotas'), idRota), updatedRota)
       .then(() => {
-        const rotas = JSON.parse(localStorage.getItem('rotas')).filter(
-          (rota) => rota.id !== idRota,
-        )
-        rotas.push(updatedRota)
-        localStorage.removeItem('rotas')
-        setTimeout(() => {
-          localStorage.setItem('rotas', JSON.stringify(rotas))
+        //const rotas = JSON.parse(localStorage.getItem('rotas')).filter(
+        //  (rota) => rota.id !== idRota,
+        //)
+        //rotas.push(updatedRota)
+        //localStorage.removeItem('rotas')
+        //setTimeout(() => {
+        //  localStorage.setItem('rotas', JSON.stringify(rotas))
           toast.success('Rota atualizada com sucesso.')
+          carregarRotasServer()
           limpaEstados()
-        }, 2500)
+        //}, 2500)
         navigate('/rota')
       })
       .catch((error) => {
-        toast.error('Erro ao atualizar rota.')
+        toast.error(`Erro ao atualizar rota.${error}`)
         console.log(error)
       })
   }

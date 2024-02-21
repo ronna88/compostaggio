@@ -244,9 +244,16 @@ export function Monitoramento() {
     fetchMonitoramentos8(inicio, final)
   }
 
+  const[count, setCount] = useState(0)
+
   useEffect(() => {
     if (monitoramentos.length === 0) {
+      if(count >=3) {
+        carregarMonitoramentosServer()
+        setCount(0)
+      }
       carregarMonitoramentos(inicio, final)
+      setCount(count+1)
     }
 
     if (!selectedMonitoramento) {

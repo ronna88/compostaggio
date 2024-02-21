@@ -28,23 +28,43 @@ export function ListaPesagens() {
     carregarRotas,
     rotas,
     setRotas,
+    carregarLixeirasServer,
+    carregarIlhasServer,
+    carregarRotasServer,
   } = useContext(IlhaContext)
   // const [lixeiras, setLixeiras] = useState([])
   // const [ilhas, setIlhas] = useState([])
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
+  const [count, setCount] = useState(0)
+  const [count2, setCount2] = useState(0)
+  const [count3, setCount3] = useState(0)
 
   useEffect(() => {
     if (lixeiras.length === 0) {
+      if(count >=3) {
+        carregarLixeirasServer()
+        setCount(0)
+      }
       carregarLixeiras()
+      setCount(count+1)
     }
     if (ilhas.length === 0) {
+      if(count2 >= 3) {
+        carregarIlhasServer()
+        setCount2(0)
+      }
       carregarIlhas()
+      setCount2(count2+1)
     }
     if (rotas.length === 0) {
+      if(count3 >= 3) {
+        carregarRotasServer()
+        setCount3(0)
+      }
       carregarRotas()
+      setCount3(count3+1)
     }
-    // console.log(rotas)
   }, [])
 
   const filterNomeIlha = (ilhaId) => {

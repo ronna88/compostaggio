@@ -21,11 +21,11 @@ export function BuscaForm() {
   const [nomeLixeira, setNomeLixeira] = useState('')
   const [lixeira, setLixeira] = useState()
   const navigate = useNavigate()
-  const { carregarLixeiras, lixeiras, ilhas } = useContext(IlhaContext)
+  const { carregarLixeiras, lixeiras, ilhas, carregarLixeirasServer } = useContext(IlhaContext)
 
   const buscarLixeira = () => {
     event.preventDefault()
-    carregarLixeiras()
+    // carregarLixeiras()
     if (!lixeira || lixeira === 'Selecione a lixeira') {
       toast.error('Lixeira não Selecionada!')
     } else {
@@ -46,7 +46,7 @@ export function BuscaForm() {
 
   useEffect(() => {
     if (lixeiras.length === 0) {
-      carregarLixeiras()
+      carregarLixeirasServer()
     }
   }, [lixeiras])
 

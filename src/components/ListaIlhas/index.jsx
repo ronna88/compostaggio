@@ -22,15 +22,21 @@ import { PencilSimple, Trash } from '@phosphor-icons/react'
 
 export function ListaIlhas() {
   const firestore = getFirestore(app)
-  const { carregarIlhas, carregarLixeiras, ilhas } = useContext(IlhaContext)
+  const { carregarIlhas, carregarLixeiras, ilhas, carregarIlhasServer } = useContext(IlhaContext)
   const [ilhasCarregadas, setIlhasCarregadas] = useState([])
   const navigate = useNavigate()
+  const [count, setCount] = useState(0)
 
   useEffect(() => {
     console.log(ilhas)
+    console.log("count: " + count)
     if (ilhas.length === 0) {
-      console.log('entrou')
+      if(count => 3) {
+        carregarIlhasServer()
+        setCount(0)
+      }
       carregarIlhas()
+      setCount(count+1)
     }
   }, [ilhas])
 

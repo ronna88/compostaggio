@@ -19,20 +19,25 @@ export function ListaLixeiras() {
   const firestore = getFirestore(app)
   const {
     carregarLixeiras,
-    carregarIlhas,
     lixeiras,
     setLixeiras,
     ilhas,
-    setIlhas,
+    carregarLixeirasServer,
   } = useContext(IlhaContext)
   // const [lixeiras1, setLixeiras1] = useState([])
   // const [ilhas, setIlhas] = useState([])
   const navigate = useNavigate()
+  const [count, setCount] = useState(0)
 
   useEffect(() => {
     console.log(lixeiras)
     if (lixeiras.length === 0) {
+      if(count >= 3) {
+        carregarLixeirasServer()
+        setCount(0)
+      }
       carregarLixeiras()
+      setCount(count+1)
     }
   }, [lixeiras])
 

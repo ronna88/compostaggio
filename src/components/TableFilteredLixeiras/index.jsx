@@ -10,6 +10,7 @@ export function TableFilteredLixeiras({
   setLixeira,
 }) {
   const [loading, setLoading] = useState(true)
+  const [count,setCount] = useState(0)
   // const [lixeiraFilha, setLixeiraFilha] = useState()
 
   const filterLixeiraById = (idLixeira) => {
@@ -27,14 +28,14 @@ export function TableFilteredLixeiras({
       lix.descricao.toLowerCase().includes(nomeLixeira.toLowerCase()),
     )
   }
-
+/*
   useEffect(() => {
     setTimeout(() => {
       if (ilhas && lixeiras) {
         setLoading(false)
       }
     }, 2000)
-  }, [lixeiras, ilhas])
+  }, [lixeiras, ilhas]) */
 
   const filterNomeIlha = (ilhaId) => {
     const ilha = ilhas.find((i) => i.id === ilhaId)

@@ -39,6 +39,8 @@ export function DespejoForm() {
     setComposteiras,
     carregarRotasDisponiveis,
     rotasSemDespejo,
+    rotasSemDespejoServer,
+    carrgarRotasServer,
   } = useContext(IlhaContext)
   const { usuario } = useContext(AuthContext)
 
@@ -60,14 +62,14 @@ export function DespejoForm() {
         // novoDespejo = { ...novoDespejo, id: docRef.id }
         // despejos.push(novoDespejo)
         // localStorage.setItem('despejos', JSON.stringify(despejos))
-
+        rotasSemDespejoServer()
         updateRota(novoDespejo.rota)
         toast.success('Despejo de resíduo cadastrado com sucesso.')
         limpaEstados()
         navigate('/ilha')
       })
       .catch((error) => {
-        toast.error('Erro ao cadastrar despejo de resíduo.')
+        toast.error(`Erro ao cadastrar despejo de resíduo. ${error}`)
         console.log(error)
       })
   }
@@ -95,6 +97,7 @@ export function DespejoForm() {
         // )
         // rotas.push(updatedRota)
         // localStorage.setItem('rotas', JSON.stringify(rotas))
+        carrgarRotasServer()
         toast.success('Rota atualizada com sucesso!')
       },
     )

@@ -19,6 +19,7 @@ import {
 } from './styles'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AuthContext } from '../../contexts/AuthContext'
+import { IlhaContext } from '../../contexts/IlhasContext'
 import { toast } from 'react-toastify'
 
 export function ComposteiraForm() {
@@ -27,6 +28,7 @@ export function ComposteiraForm() {
   const { usuario } = useContext(AuthContext)
   const [edit, setEdit] = useState(false)
   const { idComposteira } = useParams()
+  const { carregarComposteirasServer } = useContext(IlhasContext)
 
   const navigate = useNavigate()
 
@@ -67,18 +69,19 @@ export function ComposteiraForm() {
 
     addDoc(collection(firestore, 'composteiras'), novaComposteira)
       .then((docRef) => {
-        const composteiras = JSON.parse(localStorage.getItem('composteiras'))
-        novaComposteira = { ...novaComposteira, id: docRef.id }
+        // const composteiras = JSON.parse(localStorage.getItem('composteiras'))
+        // novaComposteira = { ...novaComposteira, id: docRef.id }
 
-        composteiras.push(novaComposteira)
-        console.log(composteiras)
-        localStorage.setItem('composteiras', JSON.stringify(composteiras))
+        // composteiras.push(novaComposteira)
+        // console.log(composteiras)
+        // localStorage.setItem('composteiras', JSON.stringify(composteiras))
+        carregarComposteirasServer()
         limpaEstados()
         toast.success('Composteira cadastrada com sucesso.')
         navigate('/composteira')
       })
-      .catch(() => {
-        toast.error('Erro ao cadastrar composteira.')
+      .catch((error) => {
+        toast.error(`Erro ao cadastrar composteira. ${error}`)
         navigate('/composteira')
       })
     limpaEstados()
@@ -112,11 +115,12 @@ export function ComposteiraForm() {
         composteiras.push(updatedComposteira)
         localStorage.setItem('composteiras', JSON.stringify(composteiras))
         limpaEstados()
+        carregarComposteirasServer()
         toast.success('Composteira atualizada com sucesso.')
         navigate('/composteira')
       })
       .catch((error) => {
-        toast.error('Erro ao cadastrar composteira.')
+        toast.error(`Erro ao cadastrar composteira.${error}`)
         console.log(error)
       })
   }
