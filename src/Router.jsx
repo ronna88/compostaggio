@@ -20,21 +20,6 @@ import { DespejoForm } from './pages/DespejoForm'
 import { ListaPesagens } from './components/ListaPesagens'
 
 export function Router() {
-  // const [listaIlhas, setListaIlhas] = useState([]);
-  const { carregarIlhas, carregarLixeiras, ilhas, lixeiras } =
-    useContext(IlhaContext)
-  const [isFirstTime, setIsFirstTime] = useState(true)
-  const headerLixeiras = ['id', 'nome', 'descricao', 'ilha']
-  const headerIlhas = ['id', 'nome', 'descricao']
-
-  useEffect(() => {
-    if (ilhas.length === 0) {
-      // carregarIlhas()
-    }
-    if (lixeiras.length === 0) {
-      // carregarLixeiras()
-    }
-  }, [])
 
   function PrivateRoute({ children }) {
     if (Cookies.get('compostagio-auth')) {
@@ -131,7 +116,7 @@ export function Router() {
           path="/busca"
           element={
             <PrivateRoute>
-              <BuscaForm lixeiras={lixeiras} />
+              <BuscaForm  />
             </PrivateRoute>
           }
         />
@@ -139,7 +124,7 @@ export function Router() {
           path="/retirada"
           element={
             <PrivateRoute>
-              <AduboForm lixeiras={lixeiras} />
+              <AduboForm  />
             </PrivateRoute>
           }
         />

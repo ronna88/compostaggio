@@ -7,10 +7,12 @@ import {
   getDocs,
   orderBy,
   query,
+  doc,
   CACHE_SIZE_UNLIMITED,
   initializeFirestore,
   getDocsFromCache,
   getDocsFromServer,
+  getDocFromServer,
 } from 'firebase/firestore'
 
 const IlhaContext = createContext({})
@@ -22,6 +24,9 @@ const IlhaProvider = ({ children }) => {
   const [composteiras, setComposteiras] = useState([])
   const [rotasSemDespejo, setRotasSemDespejo] = useState([])
   const [rotas, setRotas] = useState([])
+
+  const [pesoBombonaOrganica, setPesoBombonaOrganica] = useState()
+  const [pesoBombonaJardinagem, setPesoBombonaJardinagem] = useState()
 
   const carregarIlhas = () => {
     console.log('carregarIlhas...')
@@ -99,7 +104,9 @@ const IlhaProvider = ({ children }) => {
     const fetchComposteiras = async () => {
       console.log('Iniciando consulta das composteiras')
       const composteirasCollection = collection(firestore, 'composteiras')
-      const composteirasSnapshot = await getDocsFromCache(composteirasCollection)
+      const composteirasSnapshot = await getDocsFromCache(
+        composteirasCollection,
+      )
       setComposteiras(
         composteirasSnapshot.docs.map((doc) => ({
           id: doc.id,
@@ -118,7 +125,9 @@ const IlhaProvider = ({ children }) => {
     const fetchComposteiras = async () => {
       console.log('Iniciando consulta das composteiras')
       const composteirasCollection = collection(firestore, 'composteiras')
-      const composteirasSnapshot = await getDocsFromServer(composteirasCollection)
+      const composteirasSnapshot = await getDocsFromServer(
+        composteirasCollection,
+      )
       setComposteiras(
         composteirasSnapshot.docs.map((doc) => ({
           id: doc.id,
@@ -193,7 +202,6 @@ const IlhaProvider = ({ children }) => {
       console.log('Iniciando consulta das rotas')
       const rotasCollection = collection(firestore, 'rotas')
       const rotasSnapshot = await getDocsFromServer(rotasCollection)
-
       await setRotasSemDespejo(
         rotasSnapshot.docs
           .map((doc) => ({
@@ -204,6 +212,24 @@ const IlhaProvider = ({ children }) => {
       )
     }
     fetchRotasDisponiveisServer()
+  }
+
+  const carregarBombonaOrganicaServer = () => {
+    const fetchBombonaOrganicaServer = async () => {
+      const bombonaOrganicaCollection = doc(
+        firestore,
+        'pesoBombonaOrganica',
+        '7acIPfd02mGwFfaxCwvt',
+      )
+
+      const bombonaOrganicaSnapshot = await getDocFromServer(
+        bombonaOrganicaCollection,
+      )
+
+      await setPesoBombonaOrganica(bombonaOrganicaSnapshot.data().peso)
+      // console.log(pesoBombonaOrganica)
+    }
+    fetchBombonaOrganicaServer()
   }
 
   const ilhaContextData = {
@@ -226,7 +252,10 @@ const IlhaProvider = ({ children }) => {
     carregarLixeirasServer,
     carregarComposteirasServer,
     carregarRotasServer,
-    carregarRotasDisponiveisServer
+    carregarRotasDisponiveisServer,
+    carregarBombonaOrganicaServer,
+    setPesoBombonaOrganica,
+    pesoBombonaOrganica,
   }
 
   return (

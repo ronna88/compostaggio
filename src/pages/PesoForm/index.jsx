@@ -62,7 +62,7 @@ export function PesoForm() {
     const pesoAtual = await buscarPesoAtual()
     const pesoAtualJardinagem = await buscarPesoAtualJardinagem()
 
-    const novaRota = {
+    let novaRota = {
       peso,
       date,
       idLixeira,
@@ -73,18 +73,22 @@ export function PesoForm() {
       toast.warning('Por favor, preencha todos os campos.')
       return
     }
+    if (lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0].nome === 'Orgânico') {
+      novaRota = {...novaRota, livre: 'nao'}
+    }
+    if (lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0].nome === 'Jardinagem') {
+      novaRota = {...novaRota, livre: 'nao'}
+    }
+
     addDoc(collection(firestore, 'rotas'), novaRota)
       .then((docRef) => {
         toast.success('Peso cadastrado com sucesso.')
         carregarRotasServer()
-
         // TODO: Verificar se a rota é do tipo organica para jogar na bombona direto. 
-
         // idRota recém criada;
         const idCriado = docRef.id
         console.log(docRef)
-        if (lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0].nome === 'Orgânica') {
-
+        if (lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0].nome === 'Orgânico') {
           // Enviar para BombonaOrganica
           addDoc(collection(firestore, 'bombonaOrganica'), { idLixeira, idRota: idCriado, peso })
             .then((docRefBombonaOrganica) => {
@@ -108,7 +112,6 @@ export function PesoForm() {
         }
         // Bombona Jardinagem
         if (lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0].nome === 'Jardinagem') {
-
           // Enviar para BombonaJardinagem
           addDoc(collection(firestore, 'bombonaJardinagem'), { idLixeira, idRota: idCriado, peso })
             .then((docRefBombonaJardinagem) => {
@@ -134,7 +137,6 @@ export function PesoForm() {
         toast.error('Erro ao cadastrar peso da lixeira.')
         console.log(error)
       })
-
     setTimeout(() => {
       limpaEstados()
       navigate('/busca')

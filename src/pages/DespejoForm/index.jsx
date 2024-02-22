@@ -24,6 +24,7 @@ import { toast } from 'react-toastify'
 import { AuthContext } from '../../contexts/AuthContext'
 
 export function DespejoForm() {
+  const [count, setCount] = useState(0)
   const [composteira, setComposteira] = useState([])
   const [edit, setEdit] = useState(false)
   const [rota, setRota] = useState({ id: '' })
@@ -31,6 +32,8 @@ export function DespejoForm() {
   const navigate = useNavigate()
   const firestore = getFirestore(app)
   const { idDespejo } = useParams()
+  const [rotasSemDespejoCarregadas, setRotasSemDespejoCarregadas] =
+    useState(false)
   const {
     carregarLixeirasServer,
     lixeiras,
@@ -41,6 +44,10 @@ export function DespejoForm() {
     rotasSemDespejo,
     rotasSemDespejoServer,
     carrgarRotasServer,
+    carregarBombonaOrganicaServer,
+    setPesoBombonaOrganica,
+    pesoBombonaOrganica,
+    setRotasSemDespejo,
   } = useContext(IlhaContext)
   const { usuario } = useContext(AuthContext)
 
@@ -55,13 +62,6 @@ export function DespejoForm() {
     }
     addDoc(collection(firestore, 'despejos'), novoDespejo)
       .then((docRef) => {
-        // let despejos = []
-        // if (localStorage.getItem('despejos')) {
-        //   despejos = JSON.parse(localStorage.getItem('despejos'))
-        // }
-        // novoDespejo = { ...novoDespejo, id: docRef.id }
-        // despejos.push(novoDespejo)
-        // localStorage.setItem('despejos', JSON.stringify(despejos))
         rotasSemDespejoServer()
         updateRota(novoDespejo.rota)
         toast.success('Despejo de resíduo cadastrado com sucesso.')
@@ -86,17 +86,12 @@ export function DespejoForm() {
     )
   }
 
-  // método para atualizar estado da rota que foi utilizada
+  // Método para atualizar estado da rota que foi utilizada
   const updateRota = (idRota) => {
     const rota = getRota(idRota)
     const updatedRota = { ...rota, livre: 'nao' }
     updateDoc(doc(collection(firestore, 'rotas'), idRota), updatedRota).then(
       () => {
-        // const rotas = JSON.parse(localStorage.getItem('rotas')).filter(
-        //  (rota) => rota.id !== idRota,
-        // )
-        // rotas.push(updatedRota)
-        // localStorage.setItem('rotas', JSON.stringify(rotas))
         carrgarRotasServer()
         toast.success('Rota atualizada com sucesso!')
       },
@@ -108,21 +103,42 @@ export function DespejoForm() {
   }
 
   useEffect(() => {
-    if (lixeiras.length === 0) {
-      carregarLixeirasServer()
-    }
-    if (composteiras.length === 0) {
-      carregarComposteirasServer()
-    }
-    console.log(rotasSemDespejo)
-    if (rotasSemDespejo.length === 0) {
-      carregarRotasDisponiveisServer()
-    }
+    // setR(carregarRotasDisponiveisServer())
+    //if (composteiras.length === 0) {
+    //  carregarComposteirasServer()
+    // }
+    // if (lixeiras.length === 0) {
+    //  carregarLixeirasServer()
+    // }
+    // if (!pesoBombonaOrganica) {
+    //  carregarBombonaOrganicaServer()
+    // }
   }, [])
 
   useEffect(() => {
-    console.log('rotaSemDespejo')
-  }, [rotasSemDespejo])
+    if (!pesoBombonaOrganica) {
+      carregarBombonaOrganicaServer()
+    }
+  }, [pesoBombonaOrganica])
+
+  useEffect(() => {
+    if (composteiras.length === 0) {
+      carregarComposteirasServer()
+    }
+  }, [composteiras])
+
+  useEffect(() => {
+    if (lixeiras.length === 0) {
+      carregarLixeirasServer()
+    }
+  }, [lixeiras])
+
+  useEffect(() => {
+    if (!rotasSemDespejoCarregadas) {
+      carregarRotasDisponiveisServer()
+      setRotasSemDespejoCarregadas(true)
+    }
+  }, [rotasSemDespejoCarregadas])
 
   return (
     <Container>
@@ -144,9 +160,18 @@ export function DespejoForm() {
                 value={rota.id}
               >
                 <option>Selecione a pesagem realizada...</option>
-                {rotasSemDespejo
+                {parseFloat(pesoBombonaOrganica) !== 0 ? (
+                  <option value="4ZSXBbuA83ijYjp9Ml9P" disabled>
+                    Bombona Orgânica - {pesoBombonaOrganica} Kg
+                  </option>
+                ) : (
+                  <option value="4ZSXBbuA83ijYjp9Ml9P">
+                    Bombona Orgânica - {pesoBombonaOrganica} Kg
+                  </option>
+                )}
+                {rotasSemDespejo[0]?.existe !== 'nao'
                   ? rotasSemDespejo.map((r) => {
-                      const data = new Date(r.date.seconds * 1000)
+                      const data = new Date(r?.date?.seconds * 1000)
 
                       return (
                         <option key={r.id} value={r.id}>{`${data
@@ -160,7 +185,7 @@ export function DespejoForm() {
                             ${r.peso}Kg`}</option>
                       )
                     })
-                  : ''}
+                  : console.log(rotasSemDespejo)}
               </SelectForm>
             </div>
             <div className="mb-3">
