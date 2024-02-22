@@ -32,12 +32,13 @@ export function ListaLixeiras() {
   useEffect(() => {
     console.log(lixeiras)
     if (lixeiras.length === 0) {
-      if(count >= 3) {
+      console.log('entrei')
+      if (count >= 3) {
         carregarLixeirasServer()
         setCount(0)
       }
       carregarLixeiras()
-      setCount(count+1)
+      setCount(count + 1)
     }
   }, [lixeiras])
 

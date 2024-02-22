@@ -27,12 +27,18 @@ export function LixeirasForm() {
   const [nome, setNome] = useState('')
   const [descricao, setDescricao] = useState('')
   const [ilha, setIlha] = useState({ nome: '' })
-  const [ilhas, setIlhas] = useState([])
+  // const [ilhas, setIlhas] = useState([])
   const [edit, setEdit] = useState(false)
   const { idLixeira } = useParams()
   const navigate = useNavigate()
   const firestore = getFirestore(app)
-  const { carregarIlhas, carregarIlhasServer, carregarLixeirasServer } = useContext(IlhaContext)
+  const {
+    carregarIlhas,
+    carregarIlhasServer,
+    carregarLixeirasServer,
+    ilhas,
+    setIlhas,
+  } = useContext(IlhaContext)
   const { usuario } = useContext(AuthContext)
 
   const buscarLixeira = async () => {
@@ -75,7 +81,7 @@ export function LixeirasForm() {
       return
     }
 
-    let novaLixeira = {
+    const novaLixeira = {
       nome,
       descricao,
       ilha,
@@ -85,23 +91,18 @@ export function LixeirasForm() {
     }
     addDoc(collection(firestore, 'lixeiras'), novaLixeira)
       .then((docRef) => {
-          // 'lixeiras' já existe, você pode fazer o JSON.parse
-          // const lixeiras = JSON.parse(localStorage.getItem('lixeiras'))
-          // novaLixeira = { ...novaLixeira, id: docRef.id }
-          // lixeiras.push(novaLixeira)
-          // localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
+        console.log(docRef.id)
+        updateDoc(
+          doc(collection(firestore, 'lixeiras'), docRef.id),
+          novaLixeira,
+        )
+          .then(() => {
+            console.log('inserido id')
+          })
+          .catch((error) => {
+            console.log(error)
+          })
 
-          updateDoc(
-            doc(collection(firestore, 'lixeiras'), novaLixeira.id),
-            novaLixeira,
-          )
-            .then(() => {
-              console.log('inserido id')
-            })
-            .catch((error) => {
-              console.log(error)
-            })
-        
         carregarLixeirasServer()
         limpaEstados()
         toast.success('Lixeira cadastrada com sucesso.')
@@ -126,11 +127,6 @@ export function LixeirasForm() {
 
     updateDoc(doc(collection(firestore, 'lixeiras'), idLixeira), updatedLixeira)
       .then(() => {
-        // const lixeiras = JSON.parse(localStorage.getItem('lixeiras')).filter(
-        //   (lixeira) => lixeira.id !== idLixeira,
-        // )
-        // lixeiras.push(updatedLixeira)
-        // localStorage.setItem('lixeiras', JSON.stringify(lixeiras))
         limpaEstados()
         toast.success('Lixeira atualizada com sucesso.')
         carregarLixeirasServer()
@@ -153,7 +149,12 @@ export function LixeirasForm() {
       setEdit(true)
       buscarLixeira()
     }
-    if (
+
+    if (ilhas.length === 0) {
+      carregarIlhasServer()
+    }
+
+    /* if (
       !localStorage.getItem('ilhas') ||
       localStorage.getItem('ilhas').length === 0
     ) {
@@ -161,7 +162,7 @@ export function LixeirasForm() {
     }
     if (localStorage.getItem('ilhas')) {
       setIlhas(JSON.parse(localStorage.getItem('ilhas')))
-    }
+    } */
   }, [])
 
   return (

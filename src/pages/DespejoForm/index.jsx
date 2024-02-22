@@ -32,12 +32,12 @@ export function DespejoForm() {
   const firestore = getFirestore(app)
   const { idDespejo } = useParams()
   const {
-    carregarLixeiras,
+    carregarLixeirasServer,
     lixeiras,
-    carregarComposteiras,
+    carregarComposteirasServer,
     composteiras,
     setComposteiras,
-    carregarRotasDisponiveis,
+    carregarRotasDisponiveisServer,
     rotasSemDespejo,
     rotasSemDespejoServer,
     carrgarRotasServer,
@@ -109,14 +109,20 @@ export function DespejoForm() {
 
   useEffect(() => {
     if (lixeiras.length === 0) {
-      carregarLixeiras()
+      carregarLixeirasServer()
     }
     if (composteiras.length === 0) {
-      carregarComposteiras()
+      carregarComposteirasServer()
     }
-
-    carregarRotasDisponiveis()
+    console.log(rotasSemDespejo)
+    if (rotasSemDespejo.length === 0) {
+      carregarRotasDisponiveisServer()
+    }
   }, [])
+
+  useEffect(() => {
+    console.log('rotaSemDespejo')
+  }, [rotasSemDespejo])
 
   return (
     <Container>
@@ -138,8 +144,8 @@ export function DespejoForm() {
                 value={rota.id}
               >
                 <option>Selecione a pesagem realizada...</option>
-                {rotaLivre
-                  ? rotaLivre.map((r) => {
+                {rotasSemDespejo
+                  ? rotasSemDespejo.map((r) => {
                       const data = new Date(r.date.seconds * 1000)
 
                       return (

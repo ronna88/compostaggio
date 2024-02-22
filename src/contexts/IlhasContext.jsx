@@ -189,7 +189,7 @@ const IlhaProvider = ({ children }) => {
     fetchRotasDisponiveis()
   }
   const carregarRotasDisponiveisServer = () => {
-    const fetchRotasDisponiveis = async () => {
+    const fetchRotasDisponiveisServer = async () => {
       console.log('Iniciando consulta das rotas')
       const rotasCollection = collection(firestore, 'rotas')
       const rotasSnapshot = await getDocsFromServer(rotasCollection)
@@ -203,7 +203,7 @@ const IlhaProvider = ({ children }) => {
           .filter((r) => r.livre !== 'nao'),
       )
     }
-    fetchRotasDisponiveis()
+    fetchRotasDisponiveisServer()
   }
 
   const ilhaContextData = {
