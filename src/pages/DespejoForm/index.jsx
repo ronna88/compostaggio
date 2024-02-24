@@ -24,6 +24,8 @@ import {
 import { toast } from 'react-toastify'
 import { AuthContext } from '../../contexts/AuthContext'
 
+//TODO: verificar a edição da pesagem para pesagens diferentes das bombonas
+
 export function DespejoForm() {
   const [composteira, setComposteira] = useState([])
   const [edit, setEdit] = useState(false)
@@ -44,7 +46,7 @@ export function DespejoForm() {
     setComposteiras,
     carregarRotasDisponiveisServer,
     rotasSemDespejo,
-    carrgarRotasServer,
+    carregarRotasServer,
     carregarBombonaOrganicaServer,
     setPesoBombonaOrganica,
     pesoBombonaOrganica,
@@ -56,35 +58,15 @@ export function DespejoForm() {
   const { usuario } = useContext(AuthContext)
 
   useEffect(() => {
-    if (!pesoBombonaOrganica) {
-      carregarBombonaOrganicaServer()
-    }
-  }, [pesoBombonaOrganica])
-
-  useEffect(() => {
-    if (!pesoBombonaJardinagem) {
-      carregarBombonaJardinagemServer()
-    }
-  }, [pesoBombonaJardinagem])
-
-  useEffect(() => {
-    if (composteiras.length === 0) {
-      carregarComposteirasServer()
-    }
-  }, [composteiras])
-
-  useEffect(() => {
-    if (lixeiras.length === 0) {
-      carregarLixeirasServer()
-    }
-  }, [lixeiras])
-
-  useEffect(() => {
     if (!rotasSemDespejoCarregadas) {
       carregarRotasDisponiveisServer()
+      carregarBombonaOrganicaServer()
+      carregarBombonaJardinagemServer()
+      carregarComposteirasServer()
+      carregarLixeirasServer()
       setRotasSemDespejoCarregadas(true)
     }
-  }, [rotasSemDespejoCarregadas])
+  }, [rotasSemDespejoCarregadas, pesoBombonaJardinagem, pesoBombonaOrganica, composteiras, lixeiras])
 
   const cadastrarDespejo = () => {
     let pesoAtualComposteira
@@ -118,7 +100,7 @@ export function DespejoForm() {
           }
           fetchComposteiraServer()
 
-          console.log(parseFloat(composteiras.filter((c) => c.id === composteira)[0].peso) + parseFloat(pesoEditavel.replace(',','.')))
+          // console.log(parseFloat(composteiras.filter((c) => c.id === composteira)[0].peso) + parseFloat(pesoEditavel.replace(',','.')))
           updateDoc(doc(collection(firestore, 'composteiras'), composteira), {
             peso: (
               parseFloat(composteiras.filter((c) => c.id === composteira)[0].peso) + parseFloat(pesoEditavel.replace(',','.'))
@@ -154,6 +136,34 @@ export function DespejoForm() {
             })
         } else {
           updateRota(novoDespejo.rota)
+          const fetchComposteiraServer = async () => {
+            const composteiraSelecionadaCollection = doc(
+              firestore,
+              'composteiras',
+              composteira,
+            )
+            const composteiraSelecionadaSnap = await getDocFromServer(
+              composteiraSelecionadaCollection,
+            )
+            // pesoAtualComposteira = 
+            console.log(composteiraSelecionadaSnap.data())
+            console.log(rotasSemDespejo)
+            console.log(rota)
+            console.log(rotasSemDespejo.find((r) => r.id === rota))
+            console.log(parseFloat(composteiraSelecionadaSnap.data().peso) + parseFloat(rotasSemDespejo.find((r) => r.id === rota).peso).toFixed(2))
+            await updateDoc(doc(firestore, 'composteiras', composteira), {
+              peso: (parseFloat(composteiraSelecionadaSnap.data().peso) + parseFloat(rotasSemDespejo.find((r) => r.id === rota).peso)).toFixed(2)
+            })
+            .then(() => {
+              console.log('atualizou peso da composteira')
+            })
+            .catch((_err) => {
+              console.log('erro ao atualizar o peso da composteira')
+            })
+          }
+          fetchComposteiraServer()
+
+          
         }
 
         limpaEstados()
@@ -183,7 +193,7 @@ export function DespejoForm() {
     const updatedRota = { ...rota, livre: 'nao' }
     updateDoc(doc(collection(firestore, 'rotas'), idRota), updatedRota).then(
       () => {
-        carrgarRotasServer()
+        carregarRotasServer()
         toast.success('Rota atualizada com sucesso!')
       },
     )
