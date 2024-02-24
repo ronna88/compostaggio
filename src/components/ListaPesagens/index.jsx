@@ -28,6 +28,8 @@ import { toast } from 'react-toastify'
 export function ListaPesagens() {
   const firestore = getFirestore(app)
   const {
+    edit,
+    setEdit,
     lixeiras,
     setLixeiras,
     carregarLixeiras,
@@ -195,10 +197,7 @@ useEffect(() => {
                       <td>
                         <ActionButtons
                           onClick={(e) => {
-                            localStorage.setItem(
-                              'editRota',
-                              JSON.stringify(rota),
-                            )
+                            setEdit(true)
                             navigate(`/rota/${rota.id}`)
                           }}
                         >

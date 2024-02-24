@@ -24,6 +24,7 @@ const IlhaProvider = ({ children }) => {
   const [composteiras, setComposteiras] = useState([])
   const [rotasSemDespejo, setRotasSemDespejo] = useState([])
   const [rotas, setRotas] = useState([])
+  const [edit, setEdit] = useState(false)
 
   const [pesoBombonaOrganica, setPesoBombonaOrganica] = useState()
   const [pesoBombonaJardinagem, setPesoBombonaJardinagem] = useState()
@@ -272,6 +273,8 @@ const IlhaProvider = ({ children }) => {
     pesoBombonaOrganica,
     carregarBombonaJardinagemServer,
     pesoBombonaJardinagem,
+    edit,
+    setEdit,
   }
 
   return (

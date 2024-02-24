@@ -31,8 +31,6 @@ import { IlhaContext } from '../../contexts/IlhasContext'
 // 4ZSXBbuA83ijYjp9Ml9P      -   ID pesoBombonaOrganica
 // xo9lP0Fpnz9gB0Mh8Ez4      -   ID pesoBombonaJardinagem
 
-//TODO: testar edição do peso da rota para atualizar o peso novo da bombona !  
-
 export function PesoForm() {
   const [edit, setEdit] = useState(false)
   const [rota, setRota] = useState('')
@@ -45,7 +43,7 @@ export function PesoForm() {
   const firestore = getFirestore(app)
   const [carregar, setCarregar] = useState(true)
   const { usuario } = useContext(AuthContext)
-  const { lixeiras, carregarRotasServer, carregarLixeirasServer } = useContext(IlhaContext)
+  const { lixeiras, carregarRotasServer, carregarLixeirasServer} = useContext(IlhaContext)
 
   const buscarPesoAtual = async () => {
     const docRef = doc(firestore, "pesoBombonaOrganica", "4ZSXBbuA83ijYjp9Ml9P");
@@ -155,21 +153,32 @@ export function PesoForm() {
       setDate(new Date())
     }
 
+    if(carregar) {
+      carregarLixeirasServer()
+      setCarregar(false)
+    }
+
     if (window.location.pathname.includes('rota')) {
       setEdit(true)
-      setRota(buscarRota(idRota))
+      buscarRota(idRota)
     }
   }, [])
 
   const buscarRota = async (idRota) => {
     const docRef = doc(firestore, 'rotas', idRota)
     const docSnap = await getDoc(docRef)
-    setPeso(docSnap.data().nome)
+    setPeso(parseFloat(docSnap.data().peso.replace(',', '.')).toFixed(2))
     setLix(docSnap.data().idLixeira)
     setDate(new Date(docSnap.data().date?.seconds * 1000))
     setPesoEdit(docSnap.data().peso)
-
-    return docSnap.data()
+    setRota({
+      id: docSnap.data().id,
+      idLixeira: docSnap.data().idLixeira,
+      livre: docSnap.data().livre,
+      peso: docSnap.data().peso,
+      updated_date: docSnap.data().updated_date,
+      usuario: docSnap.data().usuario
+    })
   }
 
   const editarRota = async () => {
@@ -181,7 +190,7 @@ export function PesoForm() {
 
     const updatedRota = {
       id: idRota,
-      peso,
+      peso: parseFloat(peso.replace(',', '.')).toFixed(2),
       date: new Date(date),
       idLixeira: lix,
       usuario: usuario.email,
@@ -192,7 +201,8 @@ export function PesoForm() {
       .then(() => {
         toast.success('Rota atualizada com sucesso.')
         // Checar se lixeira da rota é de organico
-        if (rota.idLixeira === lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0].nome === 'Orgânico') {
+        if (rota.idLixeira === lixeiras.filter((lixeira) => lixeira.id === rota.idLixeira)[0].id && lixeiras.filter((lixeira) => lixeira.id === rota.idLixeira)[0].nome === 'Orgânico') {
+          console.log('entrou no filtro tipo organico')
           // checagem se peso anterior é maior que o novo peso editado
           if (rota.peso > peso) {
             // Peso anterior é maior que o editado
@@ -212,37 +222,39 @@ export function PesoForm() {
           updateDoc(doc(collection(firestore, 'pesoBombonaOrganica'), '4ZSXBbuA83ijYjp9Ml9P'), { peso: (parseFloat(pesoAtual) + parseFloat(diferencaPesoOrganico)).toFixed(2) })
             .then(() => {
               toast.success(`Peso atualizado na bombona orgânica!`)
-              // console.log(parseFloat(pesoAtual) + parseFloat(diferencaPesoOrganico))
+              console.log(parseFloat(pesoAtual) + parseFloat(diferencaPesoOrganico))
+              console.log('finalizou alteração de peso da bombona organica')
             })
             .catch(() => {
               toast.error(`Erro ao atualizar peso na bombona orgânica`)
             })
         }
         // Checar se lixeira da rota é de jardinagem
-        if (rota.idLixeira === lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0].nome === 'Jardinagem') {
+        if (rota.idLixeira === lixeiras.filter((lixeira) => lixeira.id === rota.idLixeira)[0].id && lixeiras.filter((lixeira) => lixeira.id === rota.idLixeira)[0].nome === 'Jardinagem') {
           // checagem se peso anterior é maior que o novo peso editado
           if (rota.peso > peso) {
             // Peso anterior é maior que o editado
             // Necessário pegar a diferença dos valores e subtrair do valor da bombonaOrganica
-            diferencaPesoJardinagem = parseFloat(rota.peso) - parseFloat(peso)
+            diferencaPesoJardinagem = (parseFloat(peso.replace(',', '.')) - parseFloat(rota.peso))  // número negativo
           }
           if (rota.peso < peso) {
             // Peso anterior é menor que o editado
             // Necessário pegar a diferença dos valores e somar no valor da bombonaOrganica
-            diferencaPesoJardinagem = parseFloat(peso) - parseFloat(rota.peso)
+            diferencaPesoJardinagem = (parseFloat(peso.replace(',', '.')) - parseFloat(rota.peso))
           }
           if (rota.peso === peso) {
             // pesos iguais, não alterar o peso final da bombona
             diferencaPesoJardinagem = 0
           }
           // Iniciar atualização do peso total da bombonaJardinagem
-          updateDoc(doc(collection(firestore, 'pesoBombonajardinagem'), 'xo9lP0Fpnz9gB0Mh8Ez4'), { peso: (parseFloat(pesoAtual) + parseFloat(diferencaPesoJardinagem)).toFixed(2) })
+          updateDoc(doc(collection(firestore, 'pesoBombonaJardinagem'), 'xo9lP0Fpnz9gB0Mh8Ez4'), { peso: (parseFloat(pesoAtualJardinagem) + parseFloat(diferencaPesoJardinagem)).toFixed(2) })
             .then(() => {
               toast.success(`Peso atualizado na bombona jardinagem!`)
               // console.log(parseFloat(pesoAtual) + parseFloat(diferencaPesoJardinagem))
             })
-            .catch(() => {
-              toast.error(`Erro ao atualizar peso na bombona jardinagem`)
+            .catch((_err) => {
+              toast.error(`Erro ao atualizar peso na bombona jardinagem ${_err}`)
+              console.log(`Erro ao atualizar peso na bombona jardinagem ${_err}`)
             })
         }
         carregarRotasServer()
@@ -254,14 +266,6 @@ export function PesoForm() {
         console.log(error)
       })
   }
-
-  useEffect(()=>{
-    if(carregar) {
-      carregarLixeirasServer()
-      setCarregar(false)
-    }
-    
-  },[lixeiras])
 
   return (
     <Container>
