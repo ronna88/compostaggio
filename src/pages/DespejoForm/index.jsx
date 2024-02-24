@@ -100,10 +100,10 @@ export function DespejoForm() {
     addDoc(collection(firestore, 'despejos'), novoDespejo)
       .then((docRef) => {
         carregarRotasDisponiveisServer()
-        updateRota(novoDespejo.rota)
+        
         toast.success('Despejo de resíduo cadastrado com sucesso.')
 
-        // TODO: atualizar o peso atual da bombona, e atualizar o peso da composteira
+        // TODO: pesos das bombonas e das composteiras estao atualizando ok. falta testar quando desposita a lixeira completa. depois ajustar a edição do cadastro de deposito.
         if (pesoEditavel > 0) {
           const fetchComposteiraServer = async () => {
             const composteiraSelecionadaCollection = doc(
@@ -117,10 +117,14 @@ export function DespejoForm() {
             pesoAtualComposteira = composteiraSelecionadaSnap.data().peso
           }
           fetchComposteiraServer()
+          console.log(`teste`)
+          console.log(composteiras.filter((c) => c.id === composteira)[0].peso)
+          console.log(`teste`)
 
+          console.log(parseFloat(composteiras.filter((c) => c.id === composteira)[0].peso) + parseFloat(pesoEditavel.replace(',','.')))
           updateDoc(doc(collection(firestore, 'composteiras'), composteira), {
             peso: (
-              parseFloat(pesoAtualComposteira) + parseFloat(pesoEditavel)
+              parseFloat(composteiras.filter((c) => c.id === composteira)[0].peso) + parseFloat(pesoEditavel.replace(',','.'))
             ).toFixed(2),
           })
             .then(() => {
@@ -136,20 +140,23 @@ export function DespejoForm() {
               }
               updateDoc(doc(collection(firestore, colecao), rota), {
                 peso: (
-                  parseFloat(pesoBombonaOrganica) - parseFloat(pesoEditavel)
+                  parseFloat(pesoBombonaOrganica) - parseFloat(pesoEditavel.replace(',','.'))
                 ).toFixed(2),
               })
                 .then(() => {
                   console.log('Atualizado com sucesso o peso da bombona')
                 })
-                .then(() => {
-                  console.log('Erro ao atualizar o peso da bombona')
+                console.log()
+                .catch((_err) => {
+                  console.log('Erro ao atualizar o peso da bombona ' + _err)
                 })
             })
             .catch(() => {
               console.log('Erro ao atualizar o peso da composteira')
               toast.error('Erro ao atualizar o peso da composteira')
             })
+        } else {
+          updateRota(novoDespejo.rota)
         }
 
         limpaEstados()
@@ -168,7 +175,7 @@ export function DespejoForm() {
   }
 
   const getRota = (idRota) => {
-    return JSON.parse(localStorage.getItem('rotas')).filter(
+    return rotasSemDespejo.filter(
       (r) => r.id === idRota,
     )
   }
