@@ -117,9 +117,6 @@ export function DespejoForm() {
             pesoAtualComposteira = composteiraSelecionadaSnap.data().peso
           }
           fetchComposteiraServer()
-          console.log(`teste`)
-          console.log(composteiras.filter((c) => c.id === composteira)[0].peso)
-          console.log(`teste`)
 
           console.log(parseFloat(composteiras.filter((c) => c.id === composteira)[0].peso) + parseFloat(pesoEditavel.replace(',','.')))
           updateDoc(doc(collection(firestore, 'composteiras'), composteira), {
@@ -146,14 +143,14 @@ export function DespejoForm() {
                 .then(() => {
                   console.log('Atualizado com sucesso o peso da bombona')
                 })
-                console.log()
-                .catch((_err) => {
-                  console.log('Erro ao atualizar o peso da bombona ' + _err)
+                .catch(() => {
+                  console.log('Erro ao atualizar o peso da bombona ')
+                  toast.error('Erro ao atualizar o peso da bombona')
                 })
             })
-            .catch(() => {
-              console.log('Erro ao atualizar o peso da composteira')
-              toast.error('Erro ao atualizar o peso da composteira')
+            .catch(()=> {
+              console.log("Erro ao atualizar o peso da Composteira")
+              toast.error("Erro ao atualizar o peso da Composteira")
             })
         } else {
           updateRota(novoDespejo.rota)
