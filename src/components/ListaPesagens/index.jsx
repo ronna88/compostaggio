@@ -1,8 +1,16 @@
 import { useContext, useEffect, useState } from 'react'
 import { IlhaContext } from '../../contexts/IlhasContext'
 import { useNavigate } from 'react-router-dom'
-import { deleteDoc, getFirestore, doc } from 'firebase/firestore'
 import { app } from '../../services/firebase'
+import {
+  addDoc,
+  collection,
+  getFirestore,
+  doc,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+} from 'firebase/firestore'
 import {
   Card,
   CardHeader,
@@ -15,6 +23,7 @@ import {
   DownloadLink,
 } from './styles'
 import { PencilSimple, Trash } from '@phosphor-icons/react'
+import { toast } from 'react-toastify'
 
 export function ListaPesagens() {
   const firestore = getFirestore(app)
@@ -31,41 +40,30 @@ export function ListaPesagens() {
     carregarLixeirasServer,
     carregarIlhasServer,
     carregarRotasServer,
+    carregarBombonaJardinagemServer,
+    carregarBombonaOrganicaServer,
+    pesoBombonaJardinagem,
+    pesoBombonaOrganica,
   } = useContext(IlhaContext)
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [carregado, setCarregado] = useState(false)
-  const [carregado2, setCarregado2] = useState(false)
-  const [carregado3, setCarregado3] = useState(false)
-
-  // TODO: ao excluir atualizar o peso total da bombona
 
   useEffect(() => {
     if (!carregado) {
-      if (lixeiras.length === 0) {
         carregarLixeirasServer()
-        setCarregado(true)
-      }
-    }
-  }, [lixeiras, carregado])
-
-  useEffect(() => {
-    if (!carregado2) {
-      if (ilhas.length === 0) {
         carregarIlhasServer()
-        setCarregado2(true)
-      }
-    }
-  }, [ilhas, carregado2])
-
-  useEffect(() => {
-    if (!carregado3) {
-      if (rotas.length === 0) {
         carregarRotasServer()
-        setCarregado3(true)
-      }
+        carregarBombonaJardinagemServer()
+        carregarBombonaOrganicaServer()
+        setCarregado(true)
     }
-  }, [rotas, carregado3])
+  }, [lixeiras, carregado, ilhas, rotas, pesoBombonaJardinagem, pesoBombonaOrganica])
+
+useEffect(() => {
+  console.log(`peso Organico: ${pesoBombonaOrganica}`)
+  console.log(`peso Jardinagem: ${pesoBombonaJardinagem}`)
+},[pesoBombonaOrganica, pesoBombonaJardinagem])
 
   const filterNomeIlha = (ilhaId) => {
     const ilha = ilhas.find((i) => i.id === ilhaId)
@@ -74,14 +72,55 @@ export function ListaPesagens() {
     }
   }
 
+  const atualizarBombona = (tipoLixeira, pesoRota) => {
+    let bombonaId
+    let pesoBombona 
+    let nomeBombona
+    if(tipoLixeira === 'Orgânico') {
+      bombonaId = '4ZSXBbuA83ijYjp9Ml9P'
+      pesoBombona = pesoBombonaOrganica
+      nomeBombona = 'pesoBombonaOrganica'
+    }
+    if(tipoLixeira === 'Jardinagem') {
+      bombonaId = 'xo9lP0Fpnz9gB0Mh8Ez4'
+      pesoBombona = pesoBombonaJardinagem
+      nomeBombona = 'pesoBombonaJardinagem'
+    }
+
+    updateDoc(doc(collection(firestore, nomeBombona), bombonaId), {
+      peso: (parseFloat(pesoBombona) - parseFloat(pesoRota)).toFixed(2)
+    })
+      .then(() => {
+        toast.success('Atualização realizada com sucesso no peso da Bombona')
+        if (tipoLixeira === 'Jardinagem') {
+          carregarBombonaJardinagemServer()
+        } else {
+          carregarBombonaOrganicaServer()
+        }
+      })
+      .catch(() => {
+        toast.error('Erro ao atualizar o peso da Bombona')
+      })
+  }
+
   const deleteRota = async (rotaId) => {
+
+    const pesoRota = rotas.find((r) => r.id === rotaId).peso
+    const tipoLixeira = lixeiras.find((l) => l.id === rotas.find((r) => r.id === rotaId).idLixeira).nome
+
     const rotaRef = doc(firestore, 'rotas', rotaId)
     try {
       await deleteDoc(rotaRef)
       console.log('Rota Excluida')
+      toast.success('Rota excluída com sucesso')
       setRotas((prevList) => prevList.filter((rota) => rota.id !== rotaId))
-    } catch {
-      console.log()
+      carregarRotasServer()
+      if(tipoLixeira === 'Jardinagem' || tipoLixeira === 'Orgânico') {
+        atualizarBombona(tipoLixeira, pesoRota)
+      }
+    } catch(error) {
+      console.log('Erro ao excluir rota ' + error)
+      toast.error('Erro ao excluir Rota de Pesagem')
     }
   }
 

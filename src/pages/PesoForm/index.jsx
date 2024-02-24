@@ -31,6 +31,8 @@ import { IlhaContext } from '../../contexts/IlhasContext'
 // 4ZSXBbuA83ijYjp9Ml9P      -   ID pesoBombonaOrganica
 // xo9lP0Fpnz9gB0Mh8Ez4      -   ID pesoBombonaJardinagem
 
+//TODO: testar edição do peso da rota para atualizar o peso novo da bombona !  
+
 export function PesoForm() {
   const [edit, setEdit] = useState(false)
   const [rota, setRota] = useState('')
@@ -41,9 +43,9 @@ export function PesoForm() {
   const navigate = useNavigate()
   const { idLixeira, idRota } = useParams()
   const firestore = getFirestore(app)
-
+  const [carregar, setCarregar] = useState(true)
   const { usuario } = useContext(AuthContext)
-  const { lixeiras, carregarRotasServer } = useContext(IlhaContext)
+  const { lixeiras, carregarRotasServer, carregarLixeirasServer } = useContext(IlhaContext)
 
   const buscarPesoAtual = async () => {
     const docRef = doc(firestore, "pesoBombonaOrganica", "4ZSXBbuA83ijYjp9Ml9P");
@@ -253,17 +255,25 @@ export function PesoForm() {
       })
   }
 
+  useEffect(()=>{
+    if(carregar) {
+      carregarLixeirasServer()
+      setCarregar(false)
+    }
+    
+  },[lixeiras])
+
   return (
     <Container>
       <Card>
         <CardHeader>
           <TitleCard>PESAGEM DA LIXEIRA</TitleCard>
           <SubTitleCard>
-            {'COD: ' +
-              lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0]
-                .descricao +
+            {!carregar ? 'COD: ' +
+              lixeiras.filter((lixeira) => lixeira.id === lix)[0]
+                ?.descricao +
               ' TIPO: ' +
-              lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0].nome}
+              lixeiras.filter((lixeira) => lixeira.id === lix)[0]?.nome : 'Lixeira não carregada'}
           </SubTitleCard>
         </CardHeader>
         <div className="card-body">
