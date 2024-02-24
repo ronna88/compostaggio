@@ -20,21 +20,23 @@ export function ListaComposteira() {
   // const [composteiras, setComposteiras] = useState([])
   const [loading, setLoading] = useState([])
   const [count, setCount] = useState(0)
-  const { carregarComposteiras, composteiras, setComposteiras, carregarComposteirasServer } =
-    useContext(IlhaContext)
+  const [carregado, setCarregado] = useState(false)
+  const {
+    carregarComposteiras,
+    composteiras,
+    setComposteiras,
+    carregarComposteirasServer,
+  } = useContext(IlhaContext)
   const navigate = useNavigate()
 
   useEffect(() => {
-    console.log(composteiras)
-    if (composteiras.length === 0) {
-      if(count >= 3) {
+    if (!carregado) {
+      if (composteiras.length === 0) {
         carregarComposteirasServer()
-        setCount(0)
+        setCarregado(true)
       }
-      carregarComposteiras()
-      setCount(count+1)
     }
-  }, [])
+  }, [composteiras])
 
   const deleteComposteira = async (composteiraId) => {
     const composteiraRef = doc(firestore, 'composteiras', composteiraId)

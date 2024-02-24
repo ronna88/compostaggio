@@ -7,6 +7,7 @@ import {
   updateDoc,
   doc,
   getDocs,
+  getDocFromServer,
 } from 'firebase/firestore'
 import { useNavigate, useParams } from 'react-router-dom'
 import { IlhaContext } from '../../contexts/IlhasContext'
@@ -24,7 +25,6 @@ import { toast } from 'react-toastify'
 import { AuthContext } from '../../contexts/AuthContext'
 
 export function DespejoForm() {
-  const [count, setCount] = useState(0)
   const [composteira, setComposteira] = useState([])
   const [edit, setEdit] = useState(false)
   const [rota, setRota] = useState({ id: '' })
@@ -32,8 +32,10 @@ export function DespejoForm() {
   const navigate = useNavigate()
   const firestore = getFirestore(app)
   const { idDespejo } = useParams()
+  const [pesoEditavel, setPesoEditavel] = useState('')
   const [rotasSemDespejoCarregadas, setRotasSemDespejoCarregadas] =
     useState(false)
+
   const {
     carregarLixeirasServer,
     lixeiras,
@@ -42,16 +44,51 @@ export function DespejoForm() {
     setComposteiras,
     carregarRotasDisponiveisServer,
     rotasSemDespejo,
-    rotasSemDespejoServer,
     carrgarRotasServer,
     carregarBombonaOrganicaServer,
     setPesoBombonaOrganica,
     pesoBombonaOrganica,
+    carregarBombonaJardinagemServer,
+    pesoBombonaJardinagem,
+    setPesoBombonaJardinagem,
     setRotasSemDespejo,
   } = useContext(IlhaContext)
   const { usuario } = useContext(AuthContext)
 
+  useEffect(() => {
+    if (!pesoBombonaOrganica) {
+      carregarBombonaOrganicaServer()
+    }
+  }, [pesoBombonaOrganica])
+
+  useEffect(() => {
+    if (!pesoBombonaJardinagem) {
+      carregarBombonaJardinagemServer()
+    }
+  }, [pesoBombonaJardinagem])
+
+  useEffect(() => {
+    if (composteiras.length === 0) {
+      carregarComposteirasServer()
+    }
+  }, [composteiras])
+
+  useEffect(() => {
+    if (lixeiras.length === 0) {
+      carregarLixeirasServer()
+    }
+  }, [lixeiras])
+
+  useEffect(() => {
+    if (!rotasSemDespejoCarregadas) {
+      carregarRotasDisponiveisServer()
+      setRotasSemDespejoCarregadas(true)
+    }
+  }, [rotasSemDespejoCarregadas])
+
   const cadastrarDespejo = () => {
+    let pesoAtualComposteira
+    let colecao
     event.preventDefault()
     const novoDespejo = {
       rota,
@@ -62,9 +99,59 @@ export function DespejoForm() {
     }
     addDoc(collection(firestore, 'despejos'), novoDespejo)
       .then((docRef) => {
-        rotasSemDespejoServer()
+        carregarRotasDisponiveisServer()
         updateRota(novoDespejo.rota)
         toast.success('Despejo de resíduo cadastrado com sucesso.')
+
+        // TODO: atualizar o peso atual da bombona, e atualizar o peso da composteira
+        if (pesoEditavel > 0) {
+          const fetchComposteiraServer = async () => {
+            const composteiraSelecionadaCollection = doc(
+              firestore,
+              'composteiras',
+              composteira,
+            )
+            const composteiraSelecionadaSnap = await getDocFromServer(
+              composteiraSelecionadaCollection,
+            )
+            pesoAtualComposteira = composteiraSelecionadaSnap.data().peso
+          }
+          fetchComposteiraServer()
+
+          updateDoc(doc(collection(firestore, 'composteiras'), composteira), {
+            peso: (
+              parseFloat(pesoAtualComposteira) + parseFloat(pesoEditavel)
+            ).toFixed(2),
+          })
+            .then(() => {
+              console.log('peso composteira atualizado')
+              toast.success('Peso da composteira atualizado!')
+              // pesoBombonaOrganica
+              if (rota === '4ZSXBbuA83ijYjp9Ml9P') {
+                colecao = 'pesoBombonaOrganica'
+              }
+              // pesoBombonajardinagem
+              if (rota === 'xo9lP0Fpnz9gB0Mh8Ez4') {
+                colecao = 'pesoBombonaJardinagem'
+              }
+              updateDoc(doc(collection(firestore, colecao), rota), {
+                peso: (
+                  parseFloat(pesoBombonaOrganica) - parseFloat(pesoEditavel)
+                ).toFixed(2),
+              })
+                .then(() => {
+                  console.log('Atualizado com sucesso o peso da bombona')
+                })
+                .then(() => {
+                  console.log('Erro ao atualizar o peso da bombona')
+                })
+            })
+            .catch(() => {
+              console.log('Erro ao atualizar o peso da composteira')
+              toast.error('Erro ao atualizar o peso da composteira')
+            })
+        }
+
         limpaEstados()
         navigate('/ilha')
       })
@@ -102,44 +189,6 @@ export function DespejoForm() {
     return lixeiras.filter((l) => l.id === idLixeira)[0]
   }
 
-  useEffect(() => {
-    // setR(carregarRotasDisponiveisServer())
-    //if (composteiras.length === 0) {
-    //  carregarComposteirasServer()
-    // }
-    // if (lixeiras.length === 0) {
-    //  carregarLixeirasServer()
-    // }
-    // if (!pesoBombonaOrganica) {
-    //  carregarBombonaOrganicaServer()
-    // }
-  }, [])
-
-  useEffect(() => {
-    if (!pesoBombonaOrganica) {
-      carregarBombonaOrganicaServer()
-    }
-  }, [pesoBombonaOrganica])
-
-  useEffect(() => {
-    if (composteiras.length === 0) {
-      carregarComposteirasServer()
-    }
-  }, [composteiras])
-
-  useEffect(() => {
-    if (lixeiras.length === 0) {
-      carregarLixeirasServer()
-    }
-  }, [lixeiras])
-
-  useEffect(() => {
-    if (!rotasSemDespejoCarregadas) {
-      carregarRotasDisponiveisServer()
-      setRotasSemDespejoCarregadas(true)
-    }
-  }, [rotasSemDespejoCarregadas])
-
   return (
     <Container>
       <Card>
@@ -160,13 +209,22 @@ export function DespejoForm() {
                 value={rota.id}
               >
                 <option>Selecione a pesagem realizada...</option>
-                {parseFloat(pesoBombonaOrganica) !== 0 ? (
+                {parseFloat(pesoBombonaOrganica) === 0 ? (
                   <option value="4ZSXBbuA83ijYjp9Ml9P" disabled>
                     Bombona Orgânica - {pesoBombonaOrganica} Kg
                   </option>
                 ) : (
                   <option value="4ZSXBbuA83ijYjp9Ml9P">
                     Bombona Orgânica - {pesoBombonaOrganica} Kg
+                  </option>
+                )}
+                {parseFloat(pesoBombonaJardinagem) === 0 ? (
+                  <option value="xo9lP0Fpnz9gB0Mh8Ez4" disabled>
+                    Bombona Jardinagem - {pesoBombonaJardinagem} Kg
+                  </option>
+                ) : (
+                  <option value="xo9lP0Fpnz9gB0Mh8Ez4">
+                    Bombona Jardinagem - {pesoBombonaJardinagem} Kg
                   </option>
                 )}
                 {rotasSemDespejo[0]?.existe !== 'nao'
@@ -188,6 +246,22 @@ export function DespejoForm() {
                   : console.log(rotasSemDespejo)}
               </SelectForm>
             </div>
+            {rota === '4ZSXBbuA83ijYjp9Ml9P' ||
+            rota === 'xo9lP0Fpnz9gB0Mh8Ez4' ? (
+              <div className="mb-2">
+                <LabelForm>PESO À DESPEJAR:</LabelForm>
+                <Input
+                  type="number"
+                  step={0.1}
+                  className="form-control"
+                  placeholder="Peso a ser depositado na composteira"
+                  onChange={(e) => setPesoEditavel(e.target.value)}
+                  value={pesoEditavel}
+                />
+              </div>
+            ) : (
+              ''
+            )}
             <div className="mb-3">
               <LabelForm>COMPOSTEIRA:</LabelForm>
               <SelectForm

@@ -19,24 +19,27 @@ import {
   ActionButtons,
 } from './styles'
 import { PencilSimple, Trash } from '@phosphor-icons/react'
+import { toast } from 'react-toastify'
 
 export function ListaIlhas() {
   const firestore = getFirestore(app)
-  const { carregarIlhas, carregarLixeiras, ilhas, carregarIlhasServer } = useContext(IlhaContext)
+  const {
+    carregarIlhas,
+    carregarLixeiras,
+    ilhas,
+    carregarIlhasServer,
+    setIlhas,
+  } = useContext(IlhaContext)
+  const [carregado, setCarregado] = useState(false)
   const [ilhasCarregadas, setIlhasCarregadas] = useState([])
   const navigate = useNavigate()
-  const [count, setCount] = useState(0)
 
   useEffect(() => {
-    console.log(ilhas)
-    console.log("count: " + count)
-    if (ilhas.length === 0) {
-      if(count => 3) {
+    if (!carregado) {
+      if (ilhas.length === 0) {
         carregarIlhasServer()
-        setCount(0)
+        setCarregado(true)
       }
-      carregarIlhas()
-      setCount(count+1)
     }
   }, [ilhas])
 
@@ -45,9 +48,8 @@ export function ListaIlhas() {
     try {
       await deleteDoc(ilhaRef)
       console.log('Ilha Excluida')
-      setIlhasCarregadas((prevList) =>
-        prevList.filter((ilha) => ilha.id !== ilhaId),
-      )
+      toast.success('Ilha Excluída com sucesso')
+      setIlhas((prevList) => prevList.filter((ilha) => ilha.id !== ilhaId))
     } catch {
       console.log()
     }

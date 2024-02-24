@@ -27,32 +27,24 @@ export function LixeirasForm() {
   const [nome, setNome] = useState('')
   const [descricao, setDescricao] = useState('')
   const [ilha, setIlha] = useState({ nome: '' })
-  // const [ilhas, setIlhas] = useState([])
   const [edit, setEdit] = useState(false)
   const { idLixeira } = useParams()
   const navigate = useNavigate()
   const firestore = getFirestore(app)
-  const {
-    carregarIlhas,
-    carregarIlhasServer,
-    carregarLixeirasServer,
-    ilhas,
-    setIlhas,
-  } = useContext(IlhaContext)
+  const { carregarIlhasServer, carregarLixeirasServer, ilhas, lixeiras } =
+    useContext(IlhaContext)
   const { usuario } = useContext(AuthContext)
 
   const buscarLixeira = async () => {
-    if (localStorage.getItem('lixeiras')) {
-      const lixeira = JSON.parse(localStorage.getItem('lixeiras')).find(
-        (l) => l.id === idLixeira,
-      )
+    if (lixeiras) {
+      const lixeira = lixeiras.find((l) => l.id === idLixeira)
       setNome(lixeira.nome)
       setDescricao(lixeira.descricao)
       buscarIlha(lixeira.ilha)
     } else {
       const docRef = doc(firestore, 'lixeiras', idLixeira)
       const docSnap = await getDoc(docRef)
-      // console.log(docSnap.data())
+
       setNome(docSnap.data().nome)
       setDescricao(docSnap.data().descricao)
       buscarIlha(docSnap.data().ilha)
@@ -60,15 +52,12 @@ export function LixeirasForm() {
   }
 
   const buscarIlha = async (idIlha) => {
-    if (localStorage.getItem('ilhas')) {
-      const ilha = JSON.parse(localStorage.getItem('ilhas')).find(
-        (i) => i.id === idIlha,
-      )
+    if (ilhas) {
+      const ilha = ilhas.find((i) => i.id === idIlha)
       setIlha({ ...ilha, nome: ilha.nome })
     } else {
       const docRef = doc(firestore, 'ilhas', idIlha)
       const docSnap = await getDoc(docRef)
-      // console.log(docSnap.data())
       setIlha({ ...ilha, nome: docSnap.data().nome })
     }
   }
@@ -153,16 +142,6 @@ export function LixeirasForm() {
     if (ilhas.length === 0) {
       carregarIlhasServer()
     }
-
-    /* if (
-      !localStorage.getItem('ilhas') ||
-      localStorage.getItem('ilhas').length === 0
-    ) {
-      carregarIlhas()
-    }
-    if (localStorage.getItem('ilhas')) {
-      setIlhas(JSON.parse(localStorage.getItem('ilhas')))
-    } */
   }, [])
 
   return (
@@ -178,7 +157,7 @@ export function LixeirasForm() {
         <div className="card-body">
           <form>
             <div className="mb-2">
-              <LabelForm>CÓDIGO:</LabelForm>
+              <LabelForm>TIPO DE LIXEIRA:</LabelForm>
               <Input
                 type="text"
                 className="form-control"
@@ -194,7 +173,7 @@ export function LixeirasForm() {
               <Input
                 type="text"
                 className="form-control"
-                placeholder="Descrição da Lixeira"
+                placeholder="Localização da Lixeira"
                 onChange={(e) => setDescricao(e.target.value)}
                 value={descricao}
               />

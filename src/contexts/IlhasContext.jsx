@@ -135,7 +135,6 @@ const IlhaProvider = ({ children }) => {
         })),
       )
     }
-    console.log(composteiras)
     fetchComposteiras()
   }
 
@@ -219,7 +218,7 @@ const IlhaProvider = ({ children }) => {
       const bombonaOrganicaCollection = doc(
         firestore,
         'pesoBombonaOrganica',
-        '7acIPfd02mGwFfaxCwvt',
+        '4ZSXBbuA83ijYjp9Ml9P',
       )
 
       const bombonaOrganicaSnapshot = await getDocFromServer(
@@ -227,9 +226,24 @@ const IlhaProvider = ({ children }) => {
       )
 
       await setPesoBombonaOrganica(bombonaOrganicaSnapshot.data().peso)
-      // console.log(pesoBombonaOrganica)
     }
     fetchBombonaOrganicaServer()
+  }
+  const carregarBombonaJardinagemServer = () => {
+    const fetchBombonaJardinagemServer = async () => {
+      const bombonaJardinagemCollection = doc(
+        firestore,
+        'pesoBombonaJardinagem',
+        'xo9lP0Fpnz9gB0Mh8Ez4',
+      )
+
+      const bombonaJardinagemSnapshot = await getDocFromServer(
+        bombonaJardinagemCollection,
+      )
+
+      await setPesoBombonaJardinagem(bombonaJardinagemSnapshot.data().peso)
+    }
+    fetchBombonaJardinagemServer()
   }
 
   const ilhaContextData = {
@@ -256,6 +270,8 @@ const IlhaProvider = ({ children }) => {
     carregarBombonaOrganicaServer,
     setPesoBombonaOrganica,
     pesoBombonaOrganica,
+    carregarBombonaJardinagemServer,
+    pesoBombonaJardinagem,
   }
 
   return (

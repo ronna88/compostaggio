@@ -32,40 +32,40 @@ export function ListaPesagens() {
     carregarIlhasServer,
     carregarRotasServer,
   } = useContext(IlhaContext)
-  // const [lixeiras, setLixeiras] = useState([])
-  // const [ilhas, setIlhas] = useState([])
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
-  const [count, setCount] = useState(0)
-  const [count2, setCount2] = useState(0)
-  const [count3, setCount3] = useState(0)
+  const [carregado, setCarregado] = useState(false)
+  const [carregado2, setCarregado2] = useState(false)
+  const [carregado3, setCarregado3] = useState(false)
+
+  // TODO: ao excluir atualizar o peso total da bombona
 
   useEffect(() => {
-    if (lixeiras.length === 0) {
-      if(count >=3) {
+    if (!carregado) {
+      if (lixeiras.length === 0) {
         carregarLixeirasServer()
-        setCount(0)
+        setCarregado(true)
       }
-      carregarLixeiras()
-      setCount(count+1)
     }
-    if (ilhas.length === 0) {
-      if(count2 >= 3) {
+  }, [lixeiras, carregado])
+
+  useEffect(() => {
+    if (!carregado2) {
+      if (ilhas.length === 0) {
         carregarIlhasServer()
-        setCount2(0)
+        setCarregado2(true)
       }
-      carregarIlhas()
-      setCount2(count2+1)
     }
-    if (rotas.length === 0) {
-      if(count3 >= 3) {
+  }, [ilhas, carregado2])
+
+  useEffect(() => {
+    if (!carregado3) {
+      if (rotas.length === 0) {
         carregarRotasServer()
-        setCount3(0)
+        setCarregado3(true)
       }
-      carregarRotas()
-      setCount3(count3+1)
     }
-  }, [])
+  }, [rotas, carregado3])
 
   const filterNomeIlha = (ilhaId) => {
     const ilha = ilhas.find((i) => i.id === ilhaId)
@@ -139,7 +139,6 @@ export function ListaPesagens() {
             <tbody>
               {rotas ? (
                 rotas.map((rota) => {
-                  console.log(rota)
                   const date = new Date(rota.date.seconds * 1000)
                   const formattedDate = date.toLocaleDateString('pt-BR')
                   return (

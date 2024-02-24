@@ -84,21 +84,20 @@ export function PesoForm() {
       .then((docRef) => {
         toast.success('Peso cadastrado com sucesso.')
         carregarRotasServer()
-        // TODO: Verificar se a rota é do tipo organica para jogar na bombona direto. 
         // idRota recém criada;
         const idCriado = docRef.id
-        console.log(docRef)
+        / console.log(docRef)
         if (lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0].nome === 'Orgânico') {
           // Enviar para BombonaOrganica
           addDoc(collection(firestore, 'bombonaOrganica'), { idLixeira, idRota: idCriado, peso })
             .then((docRefBombonaOrganica) => {
               toast.success('Peso enviado a Bombona Orgânica')
-              const pesoTotal = (parseFloat(pesoAtual) + parseFloat(peso))
-              console.log(pesoTotal)
+              const pesoTotal = (parseFloat(pesoAtual) + parseFloat(peso.replace(",",".")))
+              // console.log(pesoTotal)
               // Atualizar Peso Total Bombona Organica
-              updateDoc(doc(collection(firestore, 'pesoBombonaOrganica'), '4ZSXBbuA83ijYjp9Ml9P'), { peso: pesoTotal })
+              updateDoc(doc(collection(firestore, 'pesoBombonaOrganica'), '4ZSXBbuA83ijYjp9Ml9P'), { peso: pesoTotal.toFixed(2) })
                 .then(() => {
-                  console.log(`atualizado peso total da bombona`)
+                  // console.log(`atualizado peso total da bombona`)
                 })
                 .catch((error) => {
                   // toast.error(`Erro ao atualizar rota.${error}`)
@@ -116,12 +115,12 @@ export function PesoForm() {
           addDoc(collection(firestore, 'bombonaJardinagem'), { idLixeira, idRota: idCriado, peso })
             .then((docRefBombonaJardinagem) => {
               toast.success('Peso enviado a Bombona Jardinagem')
-              const pesoTotal = (parseFloat(pesoAtualJardinagem) + parseFloat(peso))
-              console.log(pesoTotal)
+              const pesoTotal = (parseFloat(pesoAtualJardinagem) + parseFloat(peso.replace(',','.')))
+              // console.log(pesoTotal)
               // Atualizar Peso Total Bombona Jardinagem
-              updateDoc(doc(collection(firestore, 'pesoBombonaJardinagem'), 'xo9lP0Fpnz9gB0Mh8Ez4'), { peso: pesoTotal })
+              updateDoc(doc(collection(firestore, 'pesoBombonaJardinagem'), 'xo9lP0Fpnz9gB0Mh8Ez4'), { peso: pesoTotal.toFixed(2) })
                 .then(() => {
-                  console.log(`atualizado peso total da bombona jardinagem`)
+                  // console.log(`atualizado peso total da bombona jardinagem`)
                 })
                 .catch((error) => {
                   console.log(error)
@@ -196,22 +195,22 @@ export function PesoForm() {
           if (rota.peso > peso) {
             // Peso anterior é maior que o editado
             // Necessário pegar a diferença dos valores e subtrair do valor da bombonaOrganica
-            diferencaPesoOrganico = parseFloat(peso) - parseFloat(rota.peso)  // número negativo
+            diferencaPesoOrganico = (parseFloat(peso.replace(',', '.')) - parseFloat(rota.peso))  // número negativo
           }
           if (rota.peso < peso) {
             // Peso anterior é menor que o editado
             // Necessário pegar a diferença dos valores e somar no valor da bombonaOrganica
-            diferencaPesoOrganico = parseFloat(peso) - parseFloat(rota.peso)
+            diferencaPesoOrganico = (parseFloat(peso.replace(',', '.')) - parseFloat(rota.peso))
           }
           if (rota.peso === peso) {
             // pesos iguais, não alterar o peso final da bombona
             diferencaPesoOrganico = 0
           }
           // Iniciar atualização do peso total da bombonaOrganica
-          updateDoc(doc(collection(firestore, 'pesoBombonaOrganica'), '4ZSXBbuA83ijYjp9Ml9P'), { peso: (parseFloat(pesoAtual) + parseFloat(diferencaPesoOrganico)) })
+          updateDoc(doc(collection(firestore, 'pesoBombonaOrganica'), '4ZSXBbuA83ijYjp9Ml9P'), { peso: (parseFloat(pesoAtual) + parseFloat(diferencaPesoOrganico)).toFixed(2) })
             .then(() => {
               toast.success(`Peso atualizado na bombona orgânica!`)
-              console.log(parseFloat(pesoAtual) + parseFloat(diferencaPesoOrganico))
+              // console.log(parseFloat(pesoAtual) + parseFloat(diferencaPesoOrganico))
             })
             .catch(() => {
               toast.error(`Erro ao atualizar peso na bombona orgânica`)
@@ -235,10 +234,10 @@ export function PesoForm() {
             diferencaPesoJardinagem = 0
           }
           // Iniciar atualização do peso total da bombonaJardinagem
-          updateDoc(doc(collection(firestore, 'pesoBombonajardinagem'), 'xo9lP0Fpnz9gB0Mh8Ez4'), { peso: (parseFloat(pesoAtual) + parseFloat(diferencaPesoJardinagem)) })
+          updateDoc(doc(collection(firestore, 'pesoBombonajardinagem'), 'xo9lP0Fpnz9gB0Mh8Ez4'), { peso: (parseFloat(pesoAtual) + parseFloat(diferencaPesoJardinagem)).toFixed(2) })
             .then(() => {
               toast.success(`Peso atualizado na bombona jardinagem!`)
-              console.log(parseFloat(pesoAtual) + parseFloat(diferencaPesoJardinagem))
+              // console.log(parseFloat(pesoAtual) + parseFloat(diferencaPesoJardinagem))
             })
             .catch(() => {
               toast.error(`Erro ao atualizar peso na bombona jardinagem`)
@@ -274,7 +273,8 @@ export function PesoForm() {
                 PESO EM KG DA LIXEIRA
               </LabelForm>
               <Input
-                type="text"
+                type="number"
+                step={0.1}
                 className="form-control"
                 placeholder="Peso em Kg da Lixeira"
                 onChange={(e) => {
