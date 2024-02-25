@@ -24,7 +24,8 @@ import {
 import { toast } from 'react-toastify'
 import { AuthContext } from '../../contexts/AuthContext'
 
-//TODO: verificar a edição da pesagem para pesagens diferentes das bombonas
+// TODO: verificar a edição da pesagem para pesagens diferentes das bombonas
+// TODO: criar tela de lista de depositos na composteira
 
 export function DespejoForm() {
   const [composteira, setComposteira] = useState([])
