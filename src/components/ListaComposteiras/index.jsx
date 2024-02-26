@@ -66,6 +66,7 @@ export function ListaComposteira() {
               <tr>
                 <th>ID</th>
                 <th>NOME</th>
+                <th>PESO</th>
                 <th>AÇÕES</th>
               </tr>
             </thead>
@@ -76,6 +77,7 @@ export function ListaComposteira() {
                     <tr key={composteira.id}>
                       <td>{composteira.id}</td>
                       <td>{composteira.nome}</td>
+                      <td>{composteira.peso} Kg</td>
                       <td>
                         <ActionButtons
                           onClick={(e) => {
