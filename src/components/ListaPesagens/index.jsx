@@ -1,8 +1,16 @@
 import { useContext, useEffect, useState } from 'react'
 import { IlhaContext } from '../../contexts/IlhasContext'
 import { useNavigate } from 'react-router-dom'
-import { deleteDoc, getFirestore, doc } from 'firebase/firestore'
 import { app } from '../../services/firebase'
+import {
+  addDoc,
+  collection,
+  getFirestore,
+  doc,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+} from 'firebase/firestore'
 import {
   Card,
   CardHeader,
@@ -15,10 +23,13 @@ import {
   DownloadLink,
 } from './styles'
 import { PencilSimple, Trash } from '@phosphor-icons/react'
+import { toast } from 'react-toastify'
 
 export function ListaPesagens() {
   const firestore = getFirestore(app)
   const {
+    edit,
+    setEdit,
     lixeiras,
     setLixeiras,
     carregarLixeiras,
@@ -28,24 +39,33 @@ export function ListaPesagens() {
     carregarRotas,
     rotas,
     setRotas,
+    carregarLixeirasServer,
+    carregarIlhasServer,
+    carregarRotasServer,
+    carregarBombonaJardinagemServer,
+    carregarBombonaOrganicaServer,
+    pesoBombonaJardinagem,
+    pesoBombonaOrganica,
   } = useContext(IlhaContext)
-  // const [lixeiras, setLixeiras] = useState([])
-  // const [ilhas, setIlhas] = useState([])
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
+  const [carregado, setCarregado] = useState(false)
 
   useEffect(() => {
-    if (lixeiras.length === 0) {
-      carregarLixeiras()
+    if (!carregado) {
+        carregarLixeirasServer()
+        carregarIlhasServer()
+        carregarRotasServer()
+        carregarBombonaJardinagemServer()
+        carregarBombonaOrganicaServer()
+        setCarregado(true)
     }
-    if (ilhas.length === 0) {
-      carregarIlhas()
-    }
-    if (rotas.length === 0) {
-      carregarRotas()
-    }
-    // console.log(rotas)
-  }, [])
+  }, [lixeiras, carregado, ilhas, rotas, pesoBombonaJardinagem, pesoBombonaOrganica])
+
+useEffect(() => {
+  console.log(`peso Organico: ${pesoBombonaOrganica}`)
+  console.log(`peso Jardinagem: ${pesoBombonaJardinagem}`)
+},[pesoBombonaOrganica, pesoBombonaJardinagem])
 
   const filterNomeIlha = (ilhaId) => {
     const ilha = ilhas.find((i) => i.id === ilhaId)
@@ -54,14 +74,55 @@ export function ListaPesagens() {
     }
   }
 
+  const atualizarBombona = (tipoLixeira, pesoRota) => {
+    let bombonaId
+    let pesoBombona 
+    let nomeBombona
+    if(tipoLixeira === 'Orgânico') {
+      bombonaId = '4ZSXBbuA83ijYjp9Ml9P'
+      pesoBombona = pesoBombonaOrganica
+      nomeBombona = 'pesoBombonaOrganica'
+    }
+    if(tipoLixeira === 'Jardinagem') {
+      bombonaId = 'xo9lP0Fpnz9gB0Mh8Ez4'
+      pesoBombona = pesoBombonaJardinagem
+      nomeBombona = 'pesoBombonaJardinagem'
+    }
+
+    updateDoc(doc(collection(firestore, nomeBombona), bombonaId), {
+      peso: (parseFloat(pesoBombona) - parseFloat(pesoRota)).toFixed(2)
+    })
+      .then(() => {
+        toast.success('Atualização realizada com sucesso no peso da Bombona')
+        if (tipoLixeira === 'Jardinagem') {
+          carregarBombonaJardinagemServer()
+        } else {
+          carregarBombonaOrganicaServer()
+        }
+      })
+      .catch(() => {
+        toast.error('Erro ao atualizar o peso da Bombona')
+      })
+  }
+
   const deleteRota = async (rotaId) => {
+
+    const pesoRota = rotas.find((r) => r.id === rotaId).peso
+    const tipoLixeira = lixeiras.find((l) => l.id === rotas.find((r) => r.id === rotaId).idLixeira).nome
+
     const rotaRef = doc(firestore, 'rotas', rotaId)
     try {
       await deleteDoc(rotaRef)
       console.log('Rota Excluida')
+      toast.success('Rota excluída com sucesso')
       setRotas((prevList) => prevList.filter((rota) => rota.id !== rotaId))
-    } catch {
-      console.log()
+      carregarRotasServer()
+      if(tipoLixeira === 'Jardinagem' || tipoLixeira === 'Orgânico') {
+        atualizarBombona(tipoLixeira, pesoRota)
+      }
+    } catch(error) {
+      console.log('Erro ao excluir rota ' + error)
+      toast.error('Erro ao excluir Rota de Pesagem')
     }
   }
 
@@ -119,7 +180,6 @@ export function ListaPesagens() {
             <tbody>
               {rotas ? (
                 rotas.map((rota) => {
-                  console.log(rota)
                   const date = new Date(rota.date.seconds * 1000)
                   const formattedDate = date.toLocaleDateString('pt-BR')
                   return (
@@ -137,10 +197,7 @@ export function ListaPesagens() {
                       <td>
                         <ActionButtons
                           onClick={(e) => {
-                            localStorage.setItem(
-                              'editRota',
-                              JSON.stringify(rota),
-                            )
+                            setEdit(true)
                             navigate(`/rota/${rota.id}`)
                           }}
                         >

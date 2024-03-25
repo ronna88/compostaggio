@@ -14,25 +14,26 @@ import {
   ActionButtons,
 } from './styles'
 import { PencilSimple, Trash } from '@phosphor-icons/react'
+import { toast } from 'react-toastify'
 
 export function ListaLixeiras() {
   const firestore = getFirestore(app)
   const {
     carregarLixeiras,
-    carregarIlhas,
     lixeiras,
     setLixeiras,
     ilhas,
-    setIlhas,
+    carregarLixeirasServer,
   } = useContext(IlhaContext)
-  // const [lixeiras1, setLixeiras1] = useState([])
-  // const [ilhas, setIlhas] = useState([])
   const navigate = useNavigate()
+  const [carregado, setCarregado] = useState(false)
 
   useEffect(() => {
-    console.log(lixeiras)
-    if (lixeiras.length === 0) {
-      carregarLixeiras()
+    if (!carregado) {
+      if (lixeiras.length === 0) {
+        carregarLixeirasServer()
+        setCarregado(true)
+      }
     }
   }, [lixeiras])
 
@@ -44,10 +45,11 @@ export function ListaLixeiras() {
   }
 
   const deleteLixeira = async (lixeiraId) => {
-    const lixeiraRef = doc(firestore, 'ilhas', lixeiraId)
+    const lixeiraRef = doc(firestore, 'lixeiras', lixeiraId)
     try {
       await deleteDoc(lixeiraRef)
       console.log('Lixeira Excluida')
+      toast.success('Lixeira Excluída com sucesso')
       setLixeiras((prevList) =>
         prevList.filter((lixeira) => lixeira.id !== lixeiraId),
       )
@@ -70,8 +72,8 @@ export function ListaLixeiras() {
             <thead>
               <tr>
                 <th>ID</th>
-                <th>NOME</th>
-                <th>DESCRIÇÃO</th>
+                <th>TIPO</th>
+                <th>LOCALIZAÇÃO</th>
                 <th>ILHA</th>
                 <th>AÇÕES</th>
               </tr>

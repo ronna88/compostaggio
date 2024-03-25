@@ -19,16 +19,24 @@ export function ListaComposteira() {
   const firestore = getFirestore(app)
   // const [composteiras, setComposteiras] = useState([])
   const [loading, setLoading] = useState([])
-  const { carregarComposteiras, composteiras, setComposteiras } =
-    useContext(IlhaContext)
+  const [count, setCount] = useState(0)
+  const [carregado, setCarregado] = useState(false)
+  const {
+    carregarComposteiras,
+    composteiras,
+    setComposteiras,
+    carregarComposteirasServer,
+  } = useContext(IlhaContext)
   const navigate = useNavigate()
 
   useEffect(() => {
-    console.log(composteiras)
-    if (composteiras.length === 0) {
-      carregarComposteiras()
+    if (!carregado) {
+      if (composteiras.length === 0) {
+        carregarComposteirasServer()
+        setCarregado(true)
+      }
     }
-  }, [])
+  }, [composteiras])
 
   const deleteComposteira = async (composteiraId) => {
     const composteiraRef = doc(firestore, 'composteiras', composteiraId)
@@ -58,6 +66,7 @@ export function ListaComposteira() {
               <tr>
                 <th>ID</th>
                 <th>NOME</th>
+                <th>PESO</th>
                 <th>AÇÕES</th>
               </tr>
             </thead>
@@ -68,6 +77,7 @@ export function ListaComposteira() {
                     <tr key={composteira.id}>
                       <td>{composteira.id}</td>
                       <td>{composteira.nome}</td>
+                      <td>{composteira.peso} Kg</td>
                       <td>
                         <ActionButtons
                           onClick={(e) => {

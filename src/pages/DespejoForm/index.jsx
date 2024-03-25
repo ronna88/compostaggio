@@ -7,6 +7,7 @@ import {
   updateDoc,
   doc,
   getDocs,
+  getDocFromServer,
 } from 'firebase/firestore'
 import { useNavigate, useParams } from 'react-router-dom'
 import { IlhaContext } from '../../contexts/IlhasContext'
@@ -23,6 +24,9 @@ import {
 import { toast } from 'react-toastify'
 import { AuthContext } from '../../contexts/AuthContext'
 
+// TODO: verificar a edição da pesagem para pesagens diferentes das bombonas
+// TODO: criar tela de lista de depositos na composteira
+
 export function DespejoForm() {
   const [composteira, setComposteira] = useState([])
   const [edit, setEdit] = useState(false)
@@ -31,18 +35,43 @@ export function DespejoForm() {
   const navigate = useNavigate()
   const firestore = getFirestore(app)
   const { idDespejo } = useParams()
+  const [pesoEditavel, setPesoEditavel] = useState('')
+  const [rotasSemDespejoCarregadas, setRotasSemDespejoCarregadas] =
+    useState(false)
+
   const {
-    carregarLixeiras,
+    carregarLixeirasServer,
     lixeiras,
-    carregarComposteiras,
+    carregarComposteirasServer,
     composteiras,
     setComposteiras,
-    carregarRotasDisponiveis,
+    carregarRotasDisponiveisServer,
     rotasSemDespejo,
+    carregarRotasServer,
+    carregarBombonaOrganicaServer,
+    setPesoBombonaOrganica,
+    pesoBombonaOrganica,
+    carregarBombonaJardinagemServer,
+    pesoBombonaJardinagem,
+    setPesoBombonaJardinagem,
+    setRotasSemDespejo,
   } = useContext(IlhaContext)
   const { usuario } = useContext(AuthContext)
 
+  useEffect(() => {
+    if (!rotasSemDespejoCarregadas) {
+      carregarRotasDisponiveisServer()
+      carregarBombonaOrganicaServer()
+      carregarBombonaJardinagemServer()
+      carregarComposteirasServer()
+      carregarLixeirasServer()
+      setRotasSemDespejoCarregadas(true)
+    }
+  }, [rotasSemDespejoCarregadas, pesoBombonaJardinagem, pesoBombonaOrganica, composteiras, lixeiras])
+
   const cadastrarDespejo = () => {
+    let pesoAtualComposteira
+    let colecao
     event.preventDefault()
     const novoDespejo = {
       rota,
@@ -53,21 +82,96 @@ export function DespejoForm() {
     }
     addDoc(collection(firestore, 'despejos'), novoDespejo)
       .then((docRef) => {
-        // let despejos = []
-        // if (localStorage.getItem('despejos')) {
-        //   despejos = JSON.parse(localStorage.getItem('despejos'))
-        // }
-        // novoDespejo = { ...novoDespejo, id: docRef.id }
-        // despejos.push(novoDespejo)
-        // localStorage.setItem('despejos', JSON.stringify(despejos))
-
-        updateRota(novoDespejo.rota)
+        carregarRotasDisponiveisServer()
+        
         toast.success('Despejo de resíduo cadastrado com sucesso.')
+
+        // TODO: pesos das bombonas e das composteiras estao atualizando ok. falta testar quando desposita a lixeira completa. depois ajustar a edição do cadastro de deposito.
+        if (pesoEditavel > 0) {
+          const fetchComposteiraServer = async () => {
+            const composteiraSelecionadaCollection = doc(
+              firestore,
+              'composteiras',
+              composteira,
+            )
+            const composteiraSelecionadaSnap = await getDocFromServer(
+              composteiraSelecionadaCollection,
+            )
+            pesoAtualComposteira = composteiraSelecionadaSnap.data().peso
+          }
+          fetchComposteiraServer()
+
+          // console.log(parseFloat(composteiras.filter((c) => c.id === composteira)[0].peso) + parseFloat(pesoEditavel.replace(',','.')))
+          updateDoc(doc(collection(firestore, 'composteiras'), composteira), {
+            peso: (
+              parseFloat(composteiras.filter((c) => c.id === composteira)[0].peso) + parseFloat(pesoEditavel.replace(',','.'))
+            ).toFixed(2),
+          })
+            .then(() => {
+              console.log('peso composteira atualizado')
+              toast.success('Peso da composteira atualizado!')
+              // pesoBombonaOrganica
+              if (rota === '4ZSXBbuA83ijYjp9Ml9P') {
+                colecao = 'pesoBombonaOrganica'
+              }
+              // pesoBombonajardinagem
+              if (rota === 'xo9lP0Fpnz9gB0Mh8Ez4') {
+                colecao = 'pesoBombonaJardinagem'
+              }
+              updateDoc(doc(collection(firestore, colecao), rota), {
+                peso: (
+                  parseFloat(pesoBombonaOrganica) - parseFloat(pesoEditavel.replace(',','.'))
+                ).toFixed(2),
+              })
+                .then(() => {
+                  console.log('Atualizado com sucesso o peso da bombona')
+                })
+                .catch(() => {
+                  console.log('Erro ao atualizar o peso da bombona ')
+                  toast.error('Erro ao atualizar o peso da bombona')
+                })
+            })
+            .catch(()=> {
+              console.log("Erro ao atualizar o peso da Composteira")
+              toast.error("Erro ao atualizar o peso da Composteira")
+            })
+        } else {
+          updateRota(novoDespejo.rota)
+          const fetchComposteiraServer = async () => {
+            const composteiraSelecionadaCollection = doc(
+              firestore,
+              'composteiras',
+              composteira,
+            )
+            const composteiraSelecionadaSnap = await getDocFromServer(
+              composteiraSelecionadaCollection,
+            )
+            // pesoAtualComposteira = 
+            console.log(composteiraSelecionadaSnap.data())
+            console.log(rotasSemDespejo)
+            console.log(rota)
+            console.log(rotasSemDespejo.find((r) => r.id === rota))
+            console.log(parseFloat(composteiraSelecionadaSnap.data().peso) + parseFloat(rotasSemDespejo.find((r) => r.id === rota).peso).toFixed(2))
+            await updateDoc(doc(firestore, 'composteiras', composteira), {
+              peso: (parseFloat(composteiraSelecionadaSnap.data().peso) + parseFloat(rotasSemDespejo.find((r) => r.id === rota).peso)).toFixed(2)
+            })
+            .then(() => {
+              console.log('atualizou peso da composteira')
+            })
+            .catch((_err) => {
+              console.log('erro ao atualizar o peso da composteira')
+            })
+          }
+          fetchComposteiraServer()
+
+          
+        }
+
         limpaEstados()
         navigate('/ilha')
       })
       .catch((error) => {
-        toast.error('Erro ao cadastrar despejo de resíduo.')
+        toast.error(`Erro ao cadastrar despejo de resíduo. ${error}`)
         console.log(error)
       })
   }
@@ -79,22 +183,18 @@ export function DespejoForm() {
   }
 
   const getRota = (idRota) => {
-    return JSON.parse(localStorage.getItem('rotas')).filter(
+    return rotasSemDespejo.filter(
       (r) => r.id === idRota,
     )
   }
 
-  // método para atualizar estado da rota que foi utilizada
+  // Método para atualizar estado da rota que foi utilizada
   const updateRota = (idRota) => {
     const rota = getRota(idRota)
     const updatedRota = { ...rota, livre: 'nao' }
     updateDoc(doc(collection(firestore, 'rotas'), idRota), updatedRota).then(
       () => {
-        // const rotas = JSON.parse(localStorage.getItem('rotas')).filter(
-        //  (rota) => rota.id !== idRota,
-        // )
-        // rotas.push(updatedRota)
-        // localStorage.setItem('rotas', JSON.stringify(rotas))
+        carregarRotasServer()
         toast.success('Rota atualizada com sucesso!')
       },
     )
@@ -103,17 +203,6 @@ export function DespejoForm() {
   const buscaLixeira = (idLixeira) => {
     return lixeiras.filter((l) => l.id === idLixeira)[0]
   }
-
-  useEffect(() => {
-    if (lixeiras.length === 0) {
-      carregarLixeiras()
-    }
-    if (composteiras.length === 0) {
-      carregarComposteiras()
-    }
-
-    carregarRotasDisponiveis()
-  }, [])
 
   return (
     <Container>
@@ -135,9 +224,27 @@ export function DespejoForm() {
                 value={rota.id}
               >
                 <option>Selecione a pesagem realizada...</option>
-                {rotaLivre
-                  ? rotaLivre.map((r) => {
-                      const data = new Date(r.date.seconds * 1000)
+                {parseFloat(pesoBombonaOrganica) === 0 ? (
+                  <option value="4ZSXBbuA83ijYjp9Ml9P" disabled>
+                    Bombona Orgânica - {pesoBombonaOrganica} Kg
+                  </option>
+                ) : (
+                  <option value="4ZSXBbuA83ijYjp9Ml9P">
+                    Bombona Orgânica - {pesoBombonaOrganica} Kg
+                  </option>
+                )}
+                {parseFloat(pesoBombonaJardinagem) === 0 ? (
+                  <option value="xo9lP0Fpnz9gB0Mh8Ez4" disabled>
+                    Bombona Jardinagem - {pesoBombonaJardinagem} Kg
+                  </option>
+                ) : (
+                  <option value="xo9lP0Fpnz9gB0Mh8Ez4">
+                    Bombona Jardinagem - {pesoBombonaJardinagem} Kg
+                  </option>
+                )}
+                {rotasSemDespejo[0]?.existe !== 'nao'
+                  ? rotasSemDespejo.map((r) => {
+                      const data = new Date(r?.date?.seconds * 1000)
 
                       return (
                         <option key={r.id} value={r.id}>{`${data
@@ -151,9 +258,25 @@ export function DespejoForm() {
                             ${r.peso}Kg`}</option>
                       )
                     })
-                  : ''}
+                  : console.log(rotasSemDespejo)}
               </SelectForm>
             </div>
+            {rota === '4ZSXBbuA83ijYjp9Ml9P' ||
+            rota === 'xo9lP0Fpnz9gB0Mh8Ez4' ? (
+              <div className="mb-2">
+                <LabelForm>PESO À DESPEJAR:</LabelForm>
+                <Input
+                  type="number"
+                  step={0.1}
+                  className="form-control"
+                  placeholder="Peso a ser depositado na composteira"
+                  onChange={(e) => setPesoEditavel(e.target.value)}
+                  value={pesoEditavel}
+                />
+              </div>
+            ) : (
+              ''
+            )}
             <div className="mb-3">
               <LabelForm>COMPOSTEIRA:</LabelForm>
               <SelectForm

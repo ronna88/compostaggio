@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { useContext, useEffect, useState } from 'react'
 import { app } from '../../services/firebase'
 import {
@@ -26,46 +27,119 @@ import { toast } from 'react-toastify'
 import { AuthContext } from '../../contexts/AuthContext'
 import { IlhaContext } from '../../contexts/IlhasContext'
 
+
+// 4ZSXBbuA83ijYjp9Ml9P      -   ID pesoBombonaOrganica
+// xo9lP0Fpnz9gB0Mh8Ez4      -   ID pesoBombonaJardinagem
+
 export function PesoForm() {
   const [edit, setEdit] = useState(false)
   const [rota, setRota] = useState('')
   const [peso, setPeso] = useState('')
+  const [pesoEdit, setPesoEdit] = useState('')
   const [date, setDate] = useState(new Date())
   const [lix, setLix] = useState('')
   const navigate = useNavigate()
   const { idLixeira, idRota } = useParams()
   const firestore = getFirestore(app)
-
+  const [carregar, setCarregar] = useState(true)
   const { usuario } = useContext(AuthContext)
-  const { lixeiras } = useContext(IlhaContext)
+  const { lixeiras, carregarRotasServer, carregarLixeirasServer} = useContext(IlhaContext)
 
-  const salvarRota = () => {
+  const buscarPesoAtual = async () => {
+    const docRef = doc(firestore, "pesoBombonaOrganica", "4ZSXBbuA83ijYjp9Ml9P");
+    const docSnap = await getDoc(docRef);
+    return docSnap.data().peso
+  }
+
+  const buscarPesoAtualJardinagem = async () => {
+    const docRef = doc(firestore, "pesoBombonaJardinagem", "xo9lP0Fpnz9gB0Mh8Ez4");
+    const docSnap = await getDoc(docRef);
+    return docSnap.data().peso
+  }
+
+  const salvarRota = async () => {
     event.preventDefault()
+    const pesoAtual = await buscarPesoAtual()
+    const pesoAtualJardinagem = await buscarPesoAtualJardinagem()
 
-    const novaRota = {
+    let novaRota = {
       peso,
       date,
       idLixeira,
       livre: 'sim',
     }
+
     if (!peso || !date || peso === ' ' || date === ' ') {
       toast.warning('Por favor, preencha todos os campos.')
       return
     }
+    if (lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0].nome === 'Orgânico') {
+      novaRota = {...novaRota, livre: 'nao'}
+    }
+    if (lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0].nome === 'Jardinagem') {
+      novaRota = {...novaRota, livre: 'nao'}
+    }
+
     addDoc(collection(firestore, 'rotas'), novaRota)
       .then((docRef) => {
         toast.success('Peso cadastrado com sucesso.')
-        console.log(docRef.id)
+        carregarRotasServer()
+        // idRota recém criada;
+        const idCriado = docRef.id
+        / console.log(docRef)
+        if (lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0].nome === 'Orgânico') {
+          // Enviar para BombonaOrganica
+          addDoc(collection(firestore, 'bombonaOrganica'), { idLixeira, idRota: idCriado, peso })
+            .then((docRefBombonaOrganica) => {
+              toast.success('Peso enviado a Bombona Orgânica')
+              const pesoTotal = (parseFloat(pesoAtual) + parseFloat(peso.replace(",",".")))
+              // console.log(pesoTotal)
+              // Atualizar Peso Total Bombona Organica
+              updateDoc(doc(collection(firestore, 'pesoBombonaOrganica'), '4ZSXBbuA83ijYjp9Ml9P'), { peso: pesoTotal.toFixed(2) })
+                .then(() => {
+                  // console.log(`atualizado peso total da bombona`)
+                })
+                .catch((error) => {
+                  // toast.error(`Erro ao atualizar rota.${error}`)
+                  console.log(`Erro ao atualizar o peso total da bombona ${error}`)
+                })
+              // Fim atualização peso total bombona
+            })
+            .catch((_err) => {
+              toast.error(`Erro ao enviar a Bombona Orgânica ${_err}`)
+            }) // Fim envio bombona
+        }
+        // Bombona Jardinagem
+        if (lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0].nome === 'Jardinagem') {
+          // Enviar para BombonaJardinagem
+          addDoc(collection(firestore, 'bombonaJardinagem'), { idLixeira, idRota: idCriado, peso })
+            .then((docRefBombonaJardinagem) => {
+              toast.success('Peso enviado a Bombona Jardinagem')
+              const pesoTotal = (parseFloat(pesoAtualJardinagem) + parseFloat(peso.replace(',','.')))
+              // console.log(pesoTotal)
+              // Atualizar Peso Total Bombona Jardinagem
+              updateDoc(doc(collection(firestore, 'pesoBombonaJardinagem'), 'xo9lP0Fpnz9gB0Mh8Ez4'), { peso: pesoTotal.toFixed(2) })
+                .then(() => {
+                  // console.log(`atualizado peso total da bombona jardinagem`)
+                })
+                .catch((error) => {
+                  console.log(error)
+                })
+              // Fim atualização peso total bombona
+            })
+            .catch((_err) => {
+              toast.error(`Erro ao enviar a Bombona Jardinagem ${_err}`)
+            }) // Fim envio bombona
+        } // Fim Bombona Jardinagem
       })
       .catch((error) => {
         toast.error('Erro ao cadastrar peso da lixeira.')
         console.log(error)
       })
-
     setTimeout(() => {
       limpaEstados()
       navigate('/busca')
-    }, 1000)
+    }, 2500)
   }
 
   const limpaEstados = () => {
@@ -79,43 +153,44 @@ export function PesoForm() {
       setDate(new Date())
     }
 
+    if(carregar) {
+      carregarLixeirasServer()
+      setCarregar(false)
+    }
+
     if (window.location.pathname.includes('rota')) {
       setEdit(true)
       buscarRota(idRota)
-      console.log('oi')
     }
   }, [])
 
-  const buscarRota = async () => {
-    if (localStorage.getItem('rotas')) {
-      const rota = JSON.parse(localStorage.getItem('rotas')).find(
-        (r) => r.id === idRota,
-      )
-      setPeso(rota.peso)
-      setLix(rota.idLixeira)
-      console.log(rota)
-      console.log(rota.date?.seconds * 1000)
-      if (isNaN(rota.date?.seconds * 1000)) {
-        // testar
-        setDate(new Date(rota.date))
-      } else {
-        setDate(new Date(rota.date?.seconds * 1000))
-      }
-    } else {
-      const docRef = doc(firestore, 'rotas', idRota)
-      const docSnap = await getDoc(docRef)
-      setPeso(docSnap.data().nome)
-      setLix(docSnap.data().idLixeira)
-      // setDate(docSnap.data().date)
-    }
-    console.log(peso)
+  const buscarRota = async (idRota) => {
+    const docRef = doc(firestore, 'rotas', idRota)
+    const docSnap = await getDoc(docRef)
+    setPeso(parseFloat(docSnap.data().peso.replace(',', '.')).toFixed(2))
+    setLix(docSnap.data().idLixeira)
+    setDate(new Date(docSnap.data().date?.seconds * 1000))
+    setPesoEdit(docSnap.data().peso)
+    setRota({
+      id: docSnap.data().id,
+      idLixeira: docSnap.data().idLixeira,
+      livre: docSnap.data().livre,
+      peso: docSnap.data().peso,
+      updated_date: docSnap.data().updated_date,
+      usuario: docSnap.data().usuario
+    })
   }
 
-  const editarRota = () => {
+  const editarRota = async () => {
     event.preventDefault()
+    const pesoAtual = await buscarPesoAtual()
+    const pesoAtualJardinagem = await buscarPesoAtualJardinagem()
+    let diferencaPesoOrganico
+    let diferencaPesoJardinagem
+
     const updatedRota = {
       id: idRota,
-      peso,
+      peso: parseFloat(peso.replace(',', '.')).toFixed(2),
       date: new Date(date),
       idLixeira: lix,
       usuario: usuario.email,
@@ -124,20 +199,70 @@ export function PesoForm() {
 
     updateDoc(doc(collection(firestore, 'rotas'), idRota), updatedRota)
       .then(() => {
-        const rotas = JSON.parse(localStorage.getItem('rotas')).filter(
-          (rota) => rota.id !== idRota,
-        )
-        rotas.push(updatedRota)
-        localStorage.removeItem('rotas')
-        setTimeout(() => {
-          localStorage.setItem('rotas', JSON.stringify(rotas))
-          toast.success('Rota atualizada com sucesso.')
-          limpaEstados()
-        }, 2500)
+        toast.success('Rota atualizada com sucesso.')
+        // Checar se lixeira da rota é de organico
+        if (rota.idLixeira === lixeiras.filter((lixeira) => lixeira.id === rota.idLixeira)[0].id && lixeiras.filter((lixeira) => lixeira.id === rota.idLixeira)[0].nome === 'Orgânico') {
+          console.log('entrou no filtro tipo organico')
+          // checagem se peso anterior é maior que o novo peso editado
+          if (rota.peso > peso) {
+            // Peso anterior é maior que o editado
+            // Necessário pegar a diferença dos valores e subtrair do valor da bombonaOrganica
+            diferencaPesoOrganico = (parseFloat(peso.replace(',', '.')) - parseFloat(rota.peso))  // número negativo
+          }
+          if (rota.peso < peso) {
+            // Peso anterior é menor que o editado
+            // Necessário pegar a diferença dos valores e somar no valor da bombonaOrganica
+            diferencaPesoOrganico = (parseFloat(peso.replace(',', '.')) - parseFloat(rota.peso))
+          }
+          if (rota.peso === peso) {
+            // pesos iguais, não alterar o peso final da bombona
+            diferencaPesoOrganico = 0
+          }
+          // Iniciar atualização do peso total da bombonaOrganica
+          updateDoc(doc(collection(firestore, 'pesoBombonaOrganica'), '4ZSXBbuA83ijYjp9Ml9P'), { peso: (parseFloat(pesoAtual) + parseFloat(diferencaPesoOrganico)).toFixed(2) })
+            .then(() => {
+              toast.success(`Peso atualizado na bombona orgânica!`)
+              console.log(parseFloat(pesoAtual) + parseFloat(diferencaPesoOrganico))
+              console.log('finalizou alteração de peso da bombona organica')
+            })
+            .catch(() => {
+              toast.error(`Erro ao atualizar peso na bombona orgânica`)
+            })
+        }
+        // Checar se lixeira da rota é de jardinagem
+        if (rota.idLixeira === lixeiras.filter((lixeira) => lixeira.id === rota.idLixeira)[0].id && lixeiras.filter((lixeira) => lixeira.id === rota.idLixeira)[0].nome === 'Jardinagem') {
+          // checagem se peso anterior é maior que o novo peso editado
+          if (rota.peso > peso) {
+            // Peso anterior é maior que o editado
+            // Necessário pegar a diferença dos valores e subtrair do valor da bombonaOrganica
+            diferencaPesoJardinagem = (parseFloat(peso.replace(',', '.')) - parseFloat(rota.peso))  // número negativo
+          }
+          if (rota.peso < peso) {
+            // Peso anterior é menor que o editado
+            // Necessário pegar a diferença dos valores e somar no valor da bombonaOrganica
+            diferencaPesoJardinagem = (parseFloat(peso.replace(',', '.')) - parseFloat(rota.peso))
+          }
+          if (rota.peso === peso) {
+            // pesos iguais, não alterar o peso final da bombona
+            diferencaPesoJardinagem = 0
+          }
+          // Iniciar atualização do peso total da bombonaJardinagem
+          updateDoc(doc(collection(firestore, 'pesoBombonaJardinagem'), 'xo9lP0Fpnz9gB0Mh8Ez4'), { peso: (parseFloat(pesoAtualJardinagem) + parseFloat(diferencaPesoJardinagem)).toFixed(2) })
+            .then(() => {
+              toast.success(`Peso atualizado na bombona jardinagem!`)
+              // console.log(parseFloat(pesoAtual) + parseFloat(diferencaPesoJardinagem))
+            })
+            .catch((_err) => {
+              toast.error(`Erro ao atualizar peso na bombona jardinagem ${_err}`)
+              console.log(`Erro ao atualizar peso na bombona jardinagem ${_err}`)
+            })
+        }
+        carregarRotasServer()
+        limpaEstados()
         navigate('/rota')
       })
       .catch((error) => {
-        toast.error('Erro ao atualizar rota.')
+        toast.error(`Erro ao atualizar rota.${error}`)
         console.log(error)
       })
   }
@@ -148,11 +273,11 @@ export function PesoForm() {
         <CardHeader>
           <TitleCard>PESAGEM DA LIXEIRA</TitleCard>
           <SubTitleCard>
-            {'COD: ' +
-              lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0]
-                .descricao +
+            {!carregar ? 'COD: ' +
+              lixeiras.filter((lixeira) => lixeira.id === lix)[0]
+                ?.descricao +
               ' TIPO: ' +
-              lixeiras.filter((lixeira) => lixeira.id === idLixeira)[0].nome}
+              lixeiras.filter((lixeira) => lixeira.id === lix)[0]?.nome : 'Lixeira não carregada'}
           </SubTitleCard>
         </CardHeader>
         <div className="card-body">
@@ -162,7 +287,8 @@ export function PesoForm() {
                 PESO EM KG DA LIXEIRA
               </LabelForm>
               <Input
-                type="text"
+                type="number"
+                step={0.1}
                 className="form-control"
                 placeholder="Peso em Kg da Lixeira"
                 onChange={(e) => {

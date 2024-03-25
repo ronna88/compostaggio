@@ -19,6 +19,7 @@ import {
 } from './styles'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AuthContext } from '../../contexts/AuthContext'
+import { IlhaContext } from '../../contexts/IlhasContext'
 import { toast } from 'react-toastify'
 
 export function ComposteiraForm() {
@@ -27,14 +28,13 @@ export function ComposteiraForm() {
   const { usuario } = useContext(AuthContext)
   const [edit, setEdit] = useState(false)
   const { idComposteira } = useParams()
+  const { carregarComposteirasServer, composteiras } = useContext(IlhaContext)
 
   const navigate = useNavigate()
 
   const buscarComposteira = async () => {
-    if (localStorage.getItem('composteiras')) {
-      const composteira = JSON.parse(localStorage.getItem('composteiras')).find(
-        (l) => l.id === idComposteira,
-      )
+    if (composteiras.length !== 0) {
+      const composteira = composteiras.find((l) => l.id === idComposteira)
       setNome(composteira.nome)
     } else {
       const docRef = doc(firestore, 'composteiras', idComposteira)
@@ -58,7 +58,7 @@ export function ComposteiraForm() {
       return
     }
 
-    let novaComposteira = {
+    const novaComposteira = {
       nome,
       usuario: usuario.email,
       updated_date: new Date().toLocaleString('pt-BR'),
@@ -67,21 +67,16 @@ export function ComposteiraForm() {
 
     addDoc(collection(firestore, 'composteiras'), novaComposteira)
       .then((docRef) => {
-        const composteiras = JSON.parse(localStorage.getItem('composteiras'))
-        novaComposteira = { ...novaComposteira, id: docRef.id }
-
-        composteiras.push(novaComposteira)
-        console.log(composteiras)
-        localStorage.setItem('composteiras', JSON.stringify(composteiras))
+        carregarComposteirasServer()
         limpaEstados()
         toast.success('Composteira cadastrada com sucesso.')
         navigate('/composteira')
       })
-      .catch(() => {
-        toast.error('Erro ao cadastrar composteira.')
+      .catch((error) => {
+        toast.error(`Erro ao cadastrar composteira. ${error}`)
+        limpaEstados()
         navigate('/composteira')
       })
-    limpaEstados()
   }
 
   const editarComposteira = () => {
@@ -104,20 +99,16 @@ export function ComposteiraForm() {
       updatedComposteira,
     )
       .then(() => {
-        console.log('Composteira atualizada')
-        const composteiras = JSON.parse(
-          localStorage.getItem('composteiras'),
-        ).filter((composteira) => composteira.id !== idComposteira)
-        console.log(composteiras)
-        composteiras.push(updatedComposteira)
-        localStorage.setItem('composteiras', JSON.stringify(composteiras))
         limpaEstados()
+        carregarComposteirasServer()
         toast.success('Composteira atualizada com sucesso.')
         navigate('/composteira')
       })
       .catch((error) => {
-        toast.error('Erro ao cadastrar composteira.')
+        toast.error(`Erro ao cadastrar composteira.${error}`)
+        limpaEstados()
         console.log(error)
+        navigate('/composteira')
       })
   }
 

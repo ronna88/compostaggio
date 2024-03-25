@@ -22,12 +22,14 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { AuthContext } from '../../contexts/AuthContext'
 import { ListaIlhas } from '../../components/ListaIlhas'
 import { toast } from 'react-toastify'
+import { IlhaContext } from '../../contexts/IlhasContext'
 
 export function IlhasForm() {
   const [nome, setNome] = useState('')
   const [descricao, setDescricao] = useState('')
   const firestore = getFirestore(app)
   const { usuario } = useContext(AuthContext)
+  const { carregarIlhasServer } = useContext(IlhaContext)
 
   const [edit, setEdit] = useState(false)
   const { idIlha } = useParams()
@@ -68,17 +70,18 @@ export function IlhasForm() {
     addDoc(collection(firestore, 'ilhas'), novaIlha)
       .then((docRef) => {
         console.log('Ilha Adicionada com Sucesso')
-        const ilhas = JSON.parse(localStorage.getItem('ilhas'))
+        // const ilhas = JSON.parse(localStorage.getItem('ilhas'))
         novaIlha = { ...novaIlha, id: docRef.id }
-        ilhas.push(novaIlha)
-        localStorage.setItem('ilhas', JSON.stringify(ilhas))
+        // ilhas.push(novaIlha)
+        // localStorage.setItem('ilhas', JSON.stringify(ilhas))
         limpaEstados()
-
         toast.success('Ilha cadastrada com sucesso.')
+        carregarIlhasServer()
         navigate('/ilha')
       })
-      .catch(() => {
-        toast.error('Erro ao cadastrar ilha.')
+      .catch((error) => {
+        console.log(error)
+        toast.error(`Erro ao cadastrar ilha. ${error}`)
         navigate('/ilha')
       })
   }
@@ -102,17 +105,18 @@ export function IlhasForm() {
     updateDoc(doc(collection(firestore, 'ilhas'), idIlha), updatedIlha)
       .then(() => {
         console.log('Ilha atualizada')
-        const ilhas = JSON.parse(localStorage.getItem('ilhas'))
-        const indexIlha = ilhas.findIndex((ilha) => ilha.id === idIlha)
-        ilhas[indexIlha] = updatedIlha
-        localStorage.setItem('ilhas', JSON.stringify(ilhas))
+        // const ilhas = JSON.parse(localStorage.getItem('ilhas'))
+        // const indexIlha = ilhas.findIndex((ilha) => ilha.id === idIlha)
+        // ilhas[indexIlha] = updatedIlha
+        // localStorage.setItem('ilhas', JSON.stringify(ilhas))
         limpaEstados()
+        carregarIlhasServer()
         toast.success('Ilha atualizada com sucesso.')
         navigate('/ilha')
       })
       .catch((error) => {
         console.log(error)
-        toast.error('Erro ao atualizar ilha.')
+        toast.error(`Erro ao atualizar ilha.${error}`)
       })
   }
 
