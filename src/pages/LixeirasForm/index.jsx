@@ -75,6 +75,7 @@ export function LixeirasForm() {
       descricao,
       ilha,
       usuario: usuario.email,
+      deleted: false,
       created_date: new Date().toLocaleString('pt-BR'),
       updated_date: new Date().toLocaleString('pt-BR'),
     }

@@ -8,12 +8,15 @@ import {
   orderBy,
   query,
   doc,
+  where,
   CACHE_SIZE_UNLIMITED,
   initializeFirestore,
   getDocsFromCache,
   getDocsFromServer,
   getDocFromServer,
 } from 'firebase/firestore'
+
+// TODO: Ajustar Where Clause na busca da listagem das lixeiras
 
 const IlhaContext = createContext({})
 const firestore = getFirestore(app)
@@ -71,13 +74,17 @@ const IlhaProvider = ({ children }) => {
     const fetchLixeiras = async () => {
       console.log('iniciando consulta de lixeiras')
       const lixeirasCollection = collection(firestore, 'lixeiras')
-      const lixeirasSnapshot = await getDocsFromCache(lixeirasCollection)
+      const lixeirasSnapshot = await getDocsFromCache(
+        lixeirasCollection,
+        where('deleted', '!=', true),
+      )
       setLixeiras(
         lixeirasSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         })),
       )
+      console.log(lixeiras)
     }
     fetchLixeiras()
   }
@@ -86,13 +93,17 @@ const IlhaProvider = ({ children }) => {
     const fetchLixeiras = async () => {
       console.log('iniciando consulta de lixeiras')
       const lixeirasCollection = collection(firestore, 'lixeiras')
-      const lixeirasSnapshot = await getDocsFromServer(lixeirasCollection)
+      const lixeirasSnapshot = await getDocsFromServer(
+        lixeirasCollection,
+        where('deleted', '!=', true),
+      )
       setLixeiras(
         lixeirasSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         })),
       )
+      console.log(lixeiras)
     }
     fetchLixeiras()
   }

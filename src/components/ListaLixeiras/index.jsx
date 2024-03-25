@@ -1,7 +1,15 @@
 import { useContext, useEffect, useState } from 'react'
 import { IlhaContext } from '../../contexts/IlhasContext'
+import { AuthContext } from '../../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import { deleteDoc, getFirestore, doc } from 'firebase/firestore'
+import {
+  deleteDoc,
+  getFirestore,
+  doc,
+  getDoc,
+  collection,
+  updateDoc,
+} from 'firebase/firestore'
 import { app } from '../../services/firebase'
 import {
   Card,
@@ -16,6 +24,7 @@ import {
 import { PencilSimple, Trash } from '@phosphor-icons/react'
 import { toast } from 'react-toastify'
 
+
 export function ListaLixeiras() {
   const firestore = getFirestore(app)
   const {
@@ -25,6 +34,7 @@ export function ListaLixeiras() {
     ilhas,
     carregarLixeirasServer,
   } = useContext(IlhaContext)
+  const { usuario } = useContext(AuthContext)
   const navigate = useNavigate()
   const [carregado, setCarregado] = useState(false)
 
@@ -45,17 +55,45 @@ export function ListaLixeiras() {
   }
 
   const deleteLixeira = async (lixeiraId) => {
-    const lixeiraRef = doc(firestore, 'lixeiras', lixeiraId)
-    try {
-      await deleteDoc(lixeiraRef)
-      console.log('Lixeira Excluida')
-      toast.success('Lixeira Excluída com sucesso')
-      setLixeiras((prevList) =>
-        prevList.filter((lixeira) => lixeira.id !== lixeiraId),
-      )
-    } catch {
-      console.log()
+    // const lixeiraRef = doc(firestore, 'lixeiras', lixeiraId)
+    // try {
+    //   await deleteDoc(lixeiraRef)
+    //   console.log('Lixeira Excluida')
+    //   toast.success('Lixeira Excluída com sucesso')
+    //   setLixeiras((prevList) =>
+    //    prevList.filter((lixeira) => lixeira.id !== lixeiraId),
+    //   )
+    // } catch {
+    //  console.log()
+    // }
+
+    const docRef = doc(firestore, 'lixeiras', lixeiraId)
+    const docSnap = await getDoc(docRef)
+
+    const updatedLixeira = {
+      id: lixeiraId,
+      nome: docSnap.data().nome,
+      descricao: docSnap.data().descricao,
+      ilha: docSnap.data().ilha,
+      usuario: usuario.email,
+      deleted: true,
+      updated_date: new Date().toLocaleString('pt-BR'),
     }
+
+    updateDoc(doc(collection(firestore, 'lixeiras'), lixeiraId), updatedLixeira)
+      .then(() => {
+        // limpaEstados()
+        toast.success('Lixeira atualizada com sucesso.')
+        carregarLixeirasServer()
+        navigate('/lixeira')
+      })
+      .catch((error) => {
+        toast.error('Erro ao atualizar lixeira.')
+        console.log(error)
+      })
+    // setNome(docSnap.data().nome)
+    // setDescricao(docSnap.data().descricao)
+    // buscarIlha(docSnap.data().ilha)
   }
 
   return (
