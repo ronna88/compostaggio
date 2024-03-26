@@ -24,7 +24,6 @@ import {
 import { PencilSimple, Trash } from '@phosphor-icons/react'
 import { toast } from 'react-toastify'
 
-
 export function ListaLixeiras() {
   const firestore = getFirestore(app)
   const {

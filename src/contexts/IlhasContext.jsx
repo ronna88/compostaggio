@@ -75,8 +75,7 @@ const IlhaProvider = ({ children }) => {
       console.log('iniciando consulta de lixeiras')
       const lixeirasCollection = collection(firestore, 'lixeiras')
       const lixeirasSnapshot = await getDocsFromCache(
-        lixeirasCollection,
-        where('deleted', '!=', true),
+        query(lixeirasCollection, where('deleted', '!=', true)),
       )
       setLixeiras(
         lixeirasSnapshot.docs.map((doc) => ({
@@ -84,7 +83,6 @@ const IlhaProvider = ({ children }) => {
           ...doc.data(),
         })),
       )
-      console.log(lixeiras)
     }
     fetchLixeiras()
   }
@@ -94,8 +92,7 @@ const IlhaProvider = ({ children }) => {
       console.log('iniciando consulta de lixeiras')
       const lixeirasCollection = collection(firestore, 'lixeiras')
       const lixeirasSnapshot = await getDocsFromServer(
-        lixeirasCollection,
-        where('deleted', '!=', true),
+        query(lixeirasCollection, where('deleted', '!=', true)),
       )
       setLixeiras(
         lixeirasSnapshot.docs.map((doc) => ({
@@ -103,7 +100,6 @@ const IlhaProvider = ({ children }) => {
           ...doc.data(),
         })),
       )
-      console.log(lixeiras)
     }
     fetchLixeiras()
   }
