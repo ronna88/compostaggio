@@ -9,6 +9,7 @@ import {
   getDoc,
   collection,
   updateDoc,
+  getDocsFromServer,
 } from 'firebase/firestore'
 import { app } from '../../services/firebase'
 import {
@@ -54,6 +55,7 @@ export function ListaLixeiras() {
   }
 
   const deleteLixeira = async (lixeiraId) => {
+    // Código para deletar registro do firebase
     // const lixeiraRef = doc(firestore, 'lixeiras', lixeiraId)
     // try {
     //   await deleteDoc(lixeiraRef)
@@ -66,33 +68,48 @@ export function ListaLixeiras() {
     //  console.log()
     // }
 
-    const docRef = doc(firestore, 'lixeiras', lixeiraId)
-    const docSnap = await getDoc(docRef)
-
-    const updatedLixeira = {
-      id: lixeiraId,
-      nome: docSnap.data().nome,
-      descricao: docSnap.data().descricao,
-      ilha: docSnap.data().ilha,
-      usuario: usuario.email,
-      deleted: true,
-      updated_date: new Date().toLocaleString('pt-BR'),
+    // TODO: verificar se a lixeira tem pesagem, se tiver fazer com que exclua primeiro as pesagens.
+    let temPesagem
+    const fetchExisteRotaParaLixeira = async () => {
+      const rotasCollection = collection(firestore, 'rotas')
+      const rotasSnapshot = await getDocsFromServer(rotasCollection)
+      temPesagem =
+        rotasSnapshot.docs.filter((r) => r.idLixeira !== lixeiraId).length > 0
+      return (
+        rotasSnapshot.docs.filter((r) => r.idLixeira !== lixeiraId).length > 0
+      )
     }
+    await fetchExisteRotaParaLixeira()
+    if (temPesagem) {
+      toast.error('Lixeira possui pesagens cadastradas. Apague-as primeiro')
+    } else {
+      const docRef = doc(firestore, 'lixeiras', lixeiraId)
+      const docSnap = await getDoc(docRef)
 
-    updateDoc(doc(collection(firestore, 'lixeiras'), lixeiraId), updatedLixeira)
-      .then(() => {
-        // limpaEstados()
-        toast.success('Lixeira atualizada com sucesso.')
-        carregarLixeirasServer()
-        navigate('/lixeira')
-      })
-      .catch((error) => {
-        toast.error('Erro ao atualizar lixeira.')
-        console.log(error)
-      })
-    // setNome(docSnap.data().nome)
-    // setDescricao(docSnap.data().descricao)
-    // buscarIlha(docSnap.data().ilha)
+      const updatedLixeira = {
+        id: lixeiraId,
+        nome: docSnap.data().nome,
+        descricao: docSnap.data().descricao,
+        ilha: docSnap.data().ilha,
+        usuario: usuario.email,
+        deleted: true,
+        updated_date: new Date().toLocaleString('pt-BR'),
+      }
+
+      updateDoc(
+        doc(collection(firestore, 'lixeiras'), lixeiraId),
+        updatedLixeira,
+      )
+        .then(() => {
+          toast.success('Lixeira deletada com sucesso.')
+          carregarLixeirasServer()
+          navigate('/lixeira')
+        })
+        .catch((error) => {
+          toast.error('Erro ao deletar a lixeira.')
+          console.log(error)
+        })
+    }
   }
 
   return (

@@ -221,6 +221,18 @@ const IlhaProvider = ({ children }) => {
     fetchRotasDisponiveisServer()
   }
 
+  const existeRotaParaLixeira = (idLixeira) => {
+    const fetchExisteRotaParaLixeira = async () => {
+      // console.log('Iniciando consulta das rotas')
+      const rotasCollection = collection(firestore, 'rotas')
+      const rotasSnapshot = await getDocsFromServer(rotasCollection)
+      return (
+        rotasSnapshot.docs.filter((r) => r.idLixeira !== idLixeira).length > 0
+      )
+    }
+    fetchExisteRotaParaLixeira()
+  }
+
   const carregarBombonaOrganicaServer = () => {
     const fetchBombonaOrganicaServer = async () => {
       const bombonaOrganicaCollection = doc(
@@ -282,6 +294,7 @@ const IlhaProvider = ({ children }) => {
     pesoBombonaJardinagem,
     edit,
     setEdit,
+    existeRotaParaLixeira,
   }
 
   return (
