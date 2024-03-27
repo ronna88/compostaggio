@@ -8,12 +8,15 @@ import {
   orderBy,
   query,
   doc,
+  where,
   CACHE_SIZE_UNLIMITED,
   initializeFirestore,
   getDocsFromCache,
   getDocsFromServer,
   getDocFromServer,
 } from 'firebase/firestore'
+
+// TODO: Ajustar Where Clause na busca da listagem das lixeiras
 
 const IlhaContext = createContext({})
 const firestore = getFirestore(app)
@@ -71,7 +74,9 @@ const IlhaProvider = ({ children }) => {
     const fetchLixeiras = async () => {
       console.log('iniciando consulta de lixeiras')
       const lixeirasCollection = collection(firestore, 'lixeiras')
-      const lixeirasSnapshot = await getDocsFromCache(lixeirasCollection)
+      const lixeirasSnapshot = await getDocsFromCache(
+        query(lixeirasCollection, where('deleted', '!=', true)),
+      )
       setLixeiras(
         lixeirasSnapshot.docs.map((doc) => ({
           id: doc.id,
@@ -86,7 +91,9 @@ const IlhaProvider = ({ children }) => {
     const fetchLixeiras = async () => {
       console.log('iniciando consulta de lixeiras')
       const lixeirasCollection = collection(firestore, 'lixeiras')
-      const lixeirasSnapshot = await getDocsFromServer(lixeirasCollection)
+      const lixeirasSnapshot = await getDocsFromServer(
+        query(lixeirasCollection, where('deleted', '!=', true)),
+      )
       setLixeiras(
         lixeirasSnapshot.docs.map((doc) => ({
           id: doc.id,
@@ -214,6 +221,18 @@ const IlhaProvider = ({ children }) => {
     fetchRotasDisponiveisServer()
   }
 
+  const existeRotaParaLixeira = (idLixeira) => {
+    const fetchExisteRotaParaLixeira = async () => {
+      // console.log('Iniciando consulta das rotas')
+      const rotasCollection = collection(firestore, 'rotas')
+      const rotasSnapshot = await getDocsFromServer(rotasCollection)
+      return (
+        rotasSnapshot.docs.filter((r) => r.idLixeira !== idLixeira).length > 0
+      )
+    }
+    fetchExisteRotaParaLixeira()
+  }
+
   const carregarBombonaOrganicaServer = () => {
     const fetchBombonaOrganicaServer = async () => {
       const bombonaOrganicaCollection = doc(
@@ -275,6 +294,7 @@ const IlhaProvider = ({ children }) => {
     pesoBombonaJardinagem,
     edit,
     setEdit,
+    existeRotaParaLixeira,
   }
 
   return (
